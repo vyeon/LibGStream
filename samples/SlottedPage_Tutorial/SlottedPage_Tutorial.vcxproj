@@ -11,29 +11,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\infograph\mpl.h" />
-    <ClInclude Include="include\infograph\type\generic\slotted_page.h" />
-    <ClInclude Include="include\infograph\type\generic\slotted_page_helper.h" />
-    <ClInclude Include="include\infograph\type\generic\unsigned_integer.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="core.cpp" />
+    <ClCompile Include="SlottedPage_Tutorial.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9DB4616B-AC70-4B76-8F32-71D9CF212495}</ProjectGuid>
+    <ProjectGuid>{f4950719-13a8-4eda-9daf-7e0111a9c2ea}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>InfoGraph</RootNamespace>
+    <RootNamespace>SlottedPage_Tutorial</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -52,16 +46,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)\lib64</OutDir>
-    <IncludePath>$(SolutionDir)\include;$(IncludePath)</IncludePath>
-    <IntDir>$(SolutionDir)\obj\x64\Debug\$(ProjectName)\</IntDir>
-    <TargetName>$(ProjectName)-vc140-sgd</TargetName>
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)\bin\$(Configuration)-$(PlatformShortName)\</OutDir>
+    <IntDir>vsbuild\$(Configuration)-$(PlatformShortName)\</IntDir>
+    <TargetName>$(ProjectName)-$(PlatformToolset)-$(PlatformShortName)-$(Configuration)</TargetName>
+    <IncludePath>$(INFOGRAPH_PATH)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(INFOGRAPH_PATH)\lib64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)\lib64</OutDir>
-    <IncludePath>$(SolutionDir)\include;$(IncludePath)</IncludePath>
-    <IntDir>$(SolutionDir)\obj\x64\Release\$(ProjectName)\</IntDir>
-    <TargetName>$(ProjectName)-vc140-s</TargetName>
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)\bin\$(Configuration)-$(PlatformShortName)\</OutDir>
+    <IntDir>vsbuild\$(Configuration)-$(PlatformShortName)\</IntDir>
+    <TargetName>$(ProjectName)-$(PlatformToolset)-$(PlatformShortName)-$(Configuration)</TargetName>
+    <IncludePath>$(INFOGRAPH_PATH)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(INFOGRAPH_PATH)\lib64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -69,13 +67,13 @@
       </PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <DebugInformationFormat>OldStyle</DebugInformationFormat>
-      <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>InfoGraph-vc140-sgd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -86,14 +84,15 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <DebugInformationFormat>OldStyle</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>InfoGraph-vc140-s.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

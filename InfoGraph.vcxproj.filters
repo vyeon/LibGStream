@@ -5,16 +5,38 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="infograph">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="infograph\type">
+      <UniqueIdentifier>{e2be7276-6ccc-4420-8645-6cb17183842f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="infograph\type\generic">
+      <UniqueIdentifier>{e452ad16-71af-4cd6-b3b5-34483851abac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
+    <ClInclude Include="include\infograph\mpl.h">
+      <Filter>infograph</Filter>
+    </ClInclude>
+    <ClInclude Include="include\infograph\type\generic\slotted_page.h">
+      <Filter>infograph\type\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="include\infograph\type\generic\slotted_page_helper.h">
+      <Filter>infograph\type\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="include\infograph\type\generic\unsigned_integer.h">
+      <Filter>infograph\type\generic</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
