@@ -98,10 +98,10 @@ typename __internal_index_t\
 enum page_flag
 {
     _BASE = 0x0001,
-    LEAD_PAGE = _BASE << 1,
-    EXTENDED_PAGE = _BASE << 2,
-    SMALL_PAGE = _BASE << 3,
-    LARGE_PAGE = _BASE << 4
+    LEAD_PAGE = _BASE,
+    EXTENDED_PAGE = _BASE << 1,
+    SMALL_PAGE = _BASE << 2,
+    LARGE_PAGE = _BASE << 3
 };
 
 #pragma pack (push, 1)
@@ -172,12 +172,14 @@ public:
 
     struct rid_tuple_t
     {
-        vertex_id_t vertex_id; // vertex_id_t
-        int32_t flag;
-        int32_t count;
+        vertex_id_t start_vid; // vertex_id_t
+        uint32_t num_related_pages;
     };
 
-    static const size_t DATA_SECTION_SIZE = PAGE_SIZE - sizeof(footer_t);
+    static constexpr size_t DATA_SECTION_SIZE = PAGE_SIZE - sizeof(footer_t);
+
+    static constexpr size_t MaximumEdgesInLeadPage = (DATA_SECTION_SIZE - sizeof(slot_t) - sizeof(adj_list_size_t)) / sizeof(adj_element_t);
+    static constexpr size_t MaximumEdgesInExtPage = (DATA_SECTION_SIZE - sizeof(slot_t)) / sizeof(adj_element_t);
 
 /* Member functions */
 public:
@@ -294,6 +296,17 @@ public:
         else
             return false;
     }
+    inline void clear() noexcept
+    {
+        memset(data_section, 0, DATA_SECTION_SIZE);
+        footer.padding = 0;
+        footer.front = 0;
+        footer.rear = DATA_SECTION_SIZE;
+    }
+    inline void set_flags(page_flag& flags)
+    {
+        footer.flags = flags;
+    }
     // Add slot operation: add a slot into slotted page, this operation returns,
     // (1) Operation result (boolean)
     // (2) The number of storable adjacency list elements for new slot (if (1) is not, set to zero)
@@ -400,11 +413,16 @@ void slotted_page<SLOTTED_PAGE_TEMPLATE_ARGS>::add_adj_elems_for_small_page_unsa
 {
     slot_t& slot = slot_ref(slot_offset);
     adj_list_size_t* size_section = reinterpret_cast<adj_list_size_t*>(&data_section[slot.internal_offset]);
-    adj_element_t*   elem_section = reinterpret_cast<adj_element_t*>(&data_section[slot.internal_offset + sizeof(adj_list_size_t)]);
     // Copying the size of adjacency list
     *size_section = list_size;
-    // Copying the adjacency elements
-    memmove(elem_section, elements, sizeof(adj_element_t) * list_size);
+
+    if (nullptr != elements)
+    {
+        // Copying the adjacency elements
+        adj_element_t*   elem_section = reinterpret_cast<adj_element_t*>(&data_section[slot.internal_offset + sizeof(adj_list_size_t)]);
+        memmove(elem_section, elements, sizeof(adj_element_t) * list_size);
+    }
+    
     footer.front += sizeof(adj_element_t) * list_size;
 }
 
@@ -413,11 +431,15 @@ void slotted_page<SLOTTED_PAGE_TEMPLATE_ARGS>::add_adj_elems_for_lead_page_unsaf
 {
     slot_t& slot = slot_ref(slot_offset);
     adj_list_size_t* size_section = reinterpret_cast<adj_list_size_t*>(&data_section[slot.internal_offset]);
-    adj_element_t*   elem_section = reinterpret_cast<adj_element_t*>(&data_section[slot.internal_offset + sizeof(adj_list_size_t)]);
     // Copying the size of adjacency list
     *size_section = list_size;
+
     // Copying the adjacency elements
-    memmove(elem_section, elements, sizeof(adj_element_t) * num_elems_in_page);
+    if (nullptr != elements)
+    {
+        adj_element_t*   elem_section = reinterpret_cast<adj_element_t*>(&data_section[slot.internal_offset + sizeof(adj_list_size_t)]);
+        memmove(elem_section, elements, sizeof(adj_element_t) * num_elems_in_page);
+    }
     footer.front += sizeof(adj_element_t) * num_elems_in_page;
 }
 
@@ -425,10 +447,14 @@ SLOTTED_PAGE_TEMPLATE
 void slotted_page<SLOTTED_PAGE_TEMPLATE_ARGS>::add_adj_elems_for_ext_page_unsafe(offset_t slot_offset, adj_list_size_t num_elems_in_page, adj_element_t* elements)
 {
     slot_t& slot = slot_ref(slot_offset);
-    adj_element_t*   elem_section = reinterpret_cast<adj_element_t*>(&data_section[slot.internal_offset]);
-    // Copying the adjacency elements
-    memmove(elem_section, elements, sizeof(adj_element_t) * num_elems_in_page);
-    footer.front += sizeof(adj_element_t) * num_elems_in_page;
+
+    if (nullptr != elements)
+    {
+        adj_element_t*   elem_section = reinterpret_cast<adj_element_t*>(&data_section[slot.internal_offset]);
+        // Copying the adjacency elements
+        memmove(elem_section, elements, sizeof(adj_element_t) * num_elems_in_page);
+        footer.front += sizeof(adj_element_t) * num_elems_in_page;
+    }
 }
 
 SLOTTED_PAGE_TEMPLATE
