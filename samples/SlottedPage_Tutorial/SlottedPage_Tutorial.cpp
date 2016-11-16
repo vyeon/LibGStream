@@ -1,5 +1,6 @@
 ﻿#include <infograph/type/generic/slotted_page.h>
 #include <infograph/type/generic/slotted_page_helper.h>
+#include <infograph/type/generic/unsigned_integer.h>
 
 /* ---------------------------------------------------------------
 **
@@ -47,8 +48,10 @@ using vertex_id_t = uint32_t;
 ** +---------------------------------------------------------------------------------------+
 ** | adj_page_id(user - def type) | adj_offset(user - def type) | payload(user - def type) |
 ** +---------------------------------------------------------------------------------------+ */
-using adj_page_id_t = uint16_t;
-using adj_offset_t  = uint16_t;
+using uint24_t = vee::unsigned_integer<3>;
+
+using adj_page_id_t = uint24_t;
+using adj_offset_t  = uint24_t;
 using adj_payload_t = uint16_t;
 
 /* Adjacency list size: user defined type
