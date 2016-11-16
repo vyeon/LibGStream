@@ -11,13 +11,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\error_code.h" />
     <ClInclude Include="include\infograph\mpl.h" />
+    <ClInclude Include="include\infograph\pagedb.h" />
     <ClInclude Include="include\infograph\type\generic\slotted_page.h" />
     <ClInclude Include="include\infograph\type\generic\slotted_page_helper.h" />
     <ClInclude Include="include\infograph\type\generic\unsigned_integer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp" />
+    <ClCompile Include="type\pagedb\pagedb_info.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9DB4616B-AC70-4B76-8F32-71D9CF212495}</ProjectGuid>

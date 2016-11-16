@@ -12,7 +12,6 @@
 #define _INFOGRAPH_TYPE_GENERIC_SLOTTED_PAGE_HELPER_
 
 #include <infograph/type/generic/slotted_page.h>
-#include <infograph/mpl.h>
 
 #ifdef _WIN32
 #include <conio.h>

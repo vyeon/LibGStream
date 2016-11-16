@@ -19,6 +19,15 @@
     <Filter Include="infograph\type\generic">
       <UniqueIdentifier>{e452ad16-71af-4cd6-b3b5-34483851abac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\type">
+      <UniqueIdentifier>{2be50d76-d5f9-453e-8f11-0292a6391690}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\type\generic">
+      <UniqueIdentifier>{971885c5-e254-41c4-994e-38c69361737e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\type\pagedb">
+      <UniqueIdentifier>{3df87818-fb76-443a-b7d9-887990eee7c3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\infograph\mpl.h">
@@ -33,10 +42,19 @@
     <ClInclude Include="include\infograph\type\generic\unsigned_integer.h">
       <Filter>infograph\type\generic</Filter>
     </ClInclude>
+    <ClInclude Include="include\infograph\pagedb.h">
+      <Filter>infograph</Filter>
+    </ClInclude>
+    <ClInclude Include="include\error_code.h">
+      <Filter>infograph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="type\pagedb\pagedb_info.cpp">
+      <Filter>Source Files\type\pagedb</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
