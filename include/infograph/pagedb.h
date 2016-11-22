@@ -1,5 +1,5 @@
-#ifndef _INFOGRAPH_TYPE_PAGEDB_H_
-#define _INFOGRAPH_TYPE_PAGEDB_H_
+#ifndef _INFOGRAPH_PAGEDB_H_
+#define _INFOGRAPH_PAGEDB_H_
 
 #include <cstdint>
 
@@ -15,7 +15,7 @@ public:
     // destructor: using a default dtor
     ~pagedb_info() = default;
     // read an information file
-    bool read_from_file(const char* filepath) noexcept;
+    bool read_from_file(const char* filepath);
 
     uint64_t num_pages = 0;
 };
@@ -23,4 +23,4 @@ public:
 
 } // !namespace igraph
 
-#endif // !_INFOGRAPH_TYPE_PAGEDB_H_
+#endif // !_INFOGRAPH_PAGEDB_H_

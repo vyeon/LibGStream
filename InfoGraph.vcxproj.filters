@@ -45,9 +45,6 @@
     <ClInclude Include="include\infograph\pagedb.h">
       <Filter>infograph</Filter>
     </ClInclude>
-    <ClInclude Include="include\error_code.h">
-      <Filter>infograph</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">
