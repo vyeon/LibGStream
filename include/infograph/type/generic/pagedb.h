@@ -27,6 +27,8 @@ public:
     ~pagedb_info() = default;
     // read an information file
     void read_from_file(const char* filepath);
+    // read from ifstream
+    void read_from_stream(std::ifstream& ifs);
     
     static constexpr unsigned int StringBufferSize = 260;
     char name[StringBufferSize];
@@ -48,7 +50,7 @@ public:
     // destructor: using a default dtor
     ~pagedb() = default;
     // read pagedb files
-    void read(const char* dbpath, const size_t bundle_of_pages = 64);
+    void read(const char* filepath, const size_t bundle_of_pages = 64);
 
     inline const pagedb_info& info() const;
 
@@ -58,18 +60,16 @@ protected:
 };
 
 template <typename PAGE_T, template <typename ELEM_T, typename> class CONT_T>
-void pagedb<PAGE_T, CONT_T>::read(const char* dbpath, const size_t bundle_of_pages/* = 64*/)
+void pagedb<PAGE_T, CONT_T>::read(const char* filepath, const size_t bundle_of_pages/* = 64*/)
 { 
-    // Read an information file
-    {
-        char path_buffer[_MAX_PATH] = { 0, };
-        sprintf_s(path_buffer, "%s%s", dbpath, "\\dbinfo");
-        _info.read_from_file(path_buffer);
-    }
+    // Open a file stream
+    std::ifstream ifs{ filepath, std::ios::in | std::ios::binary };
+
+    // Read a meta data
+    _info.read_from_stream(ifs);
 
     // Read pages
     {
-        std::ifstream ifs{ std::string{dbpath} +"\\pages", std::ios::in | std::ios::binary };
         const size_t chunk_size = sizeof(page_t) * bundle_of_pages;
         std::vector<page_t> buffer;
         buffer.resize(chunk_size);

@@ -136,6 +136,7 @@ public:
     using adj_list_size_t = __adj_list_size_t;
     using offset_t = __offset_t; 
 
+    static constexpr size_t page_size = PAGE_SIZE;
     static constexpr size_t adj_payload_size = mpl::tricky_sizeof<adj_payload_t>::value;
 
     template <typename PayloadTy>

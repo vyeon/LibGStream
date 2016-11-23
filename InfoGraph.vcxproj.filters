@@ -45,6 +45,9 @@
     <ClInclude Include="include\infograph\type\generic\pagedb.h">
       <Filter>infograph\type\generic</Filter>
     </ClInclude>
+    <ClInclude Include="include\infograph\type\generic\pagedb_generator.h">
+      <Filter>infograph\type\generic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">
