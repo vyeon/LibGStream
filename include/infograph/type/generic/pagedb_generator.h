@@ -28,6 +28,7 @@ public:
 
     void iteration_per_vertex(vertex_id_t vid, adj_list_size_t num_edges);
     void flush();
+    uint64_t number_of_pages() const;
 
 protected:
     void small_page_iteration(adj_list_size_t num_edges);
@@ -37,7 +38,8 @@ protected:
     void issue_ext_pages(size_t num_ext_pages);
 
     vertex_id_t last_svid{ 0 };
-    size_t vid_counter{ 0 };
+    uint64_t vid_counter{ 0 };
+    uint64_t num_pages{ 0 };
     std::shared_ptr<page_t> page{ std::make_shared<page_t>() };
     rid_table_t table;
 };
@@ -64,6 +66,12 @@ void rid_table_generator<PAGE_T, CONT_T>::flush()
     {
         issue_small_page();
     }
+}
+
+template <typename PAGE_T, template <typename ELEM_T, typename> class CONT_T>
+uint64_t rid_table_generator<PAGE_T, CONT_T>::number_of_pages() const
+{
+    return num_pages;
 }
 
 template <typename PAGE_T, template <typename ELEM_T, typename> class CONT_T>
@@ -101,6 +109,7 @@ void rid_table_generator<PAGE_T, CONT_T>::issue_small_page()
     table.push_back(tuple);
     last_svid = vid_counter;
     page->clear();
+    ++num_pages;
 }
 
 template <typename PAGE_T, template <typename ELEM_T, typename> class CONT_T>
@@ -112,6 +121,7 @@ void rid_table_generator<PAGE_T, CONT_T>::issue_lead_page(size_t num_related)
     table.push_back(tuple);
     // this operation does not update a member variable 'last_vid' 
     page->clear();
+    ++num_pages;
 }
 
 template <typename PAGE_T, template <typename ELEM_T, typename> class CONT_T>
@@ -126,6 +136,7 @@ void rid_table_generator<PAGE_T, CONT_T>::issue_ext_pages(size_t num_ext_pages)
     }
     last_svid = vid_counter;
     page->clear();
+    ++num_pages;
 }
 
 template <typename PAGE_T, typename RID_TABLE_T> 
@@ -164,7 +175,7 @@ protected:
 public:
     using edge_t = edge_template<edge_payload_t>;
 
-    explicit db_generator(pagedb_info& info_, rid_table_t& rid_table_, std::ofstream& ofs_, size_t bufsize);
+    explicit db_generator(pagedb_info& info, rid_table_t& rid_table_, std::ofstream& ofs_, size_t bufsize_);
     void iteration_per_vertex(vertex_id_t vid, edge_t* edges, adj_list_size_t num_edges);
     void flush();
 
@@ -182,20 +193,23 @@ protected:
     std::shared_ptr<page_t> page{ std::make_shared<page_t>() };
     std::shared_ptr<page_t> page_buffer;
     std::vector<typename page_t::adj_element_t> list_buffer;
-    size_t page_counter{ 0 };
-    size_t vid_counter{ 0 };
-    size_t num_issued{ 0 };
+    uint64_t page_counter{ 0 };
+    uint64_t vid_counter{ 0 };
+    uint64_t num_issued{ 0 };
+    size_t bufsize{ 0 };
     
     // disable default ctor
     db_generator() = delete;
 };
 
 template <typename PAGE_T, typename RID_TABLE_T>
-db_generator<PAGE_T, RID_TABLE_T>::db_generator(pagedb_info& info_, rid_table_t& rid_table_, std::ofstream& ofs_, size_t bufsize):
+db_generator<PAGE_T, RID_TABLE_T>::db_generator(pagedb_info& info, rid_table_t& rid_table_, std::ofstream& ofs_, size_t bufsize_):
     rid_table{rid_table_},
     ofs{ofs_},
-    page_buffer { new page_t[bufsize], [](page_t* p){ delete[]p; } }
+    page_buffer { new page_t[bufsize_], [](page_t* p){ delete[]p; } },
+    bufsize {bufsize_}
 {
+    info.write_to_stream(ofs);
 }
 
 template <typename PAGE_T, typename RID_TABLE_T>
@@ -223,36 +237,104 @@ void db_generator<PAGE_T, RID_TABLE_T>::flush()
 template <typename PAGE_T, typename RID_TABLE_T>
 void db_generator<PAGE_T, RID_TABLE_T>::small_page_iteration(vertex_id_t vid, edge_t* edges, adj_list_size_t num_edges)
 {
-    std::ofstream outfile_info{ dbname + ".info", std::ios::out | std::ios::binary };
-    uint64_t num_pages = num_issued;
-    outfile_info.write(reinterpret_cast<char*>(&num_pages), sizeof(decltype(num_pages)));
+    auto scan_result = page->scan();
+    bool& is_slot_available = scan_result.first;
+    size_t& capacity = scan_result.second;
+
+    if (!is_slot_available || (capacity < num_edges))
+        issue_page(igraph::SMALL_PAGE);
+
+    page->add_slot_unsafe(vid);
+
+    if (num_edges == 0)
+        return;
+
+    auto offset = page->number_of_slots() - 1;
+    update_list_buffer(edges, num_edges);
+    page->add_adj_elems_for_small_page_unsafe(offset, num_edges, list_buffer.data());
 }
 
 template <typename PAGE_T, typename RID_TABLE_T>
 void db_generator<PAGE_T, RID_TABLE_T>::large_page_iteration(vertex_id_t vid, edge_t* edges, adj_list_size_t num_edges)
 {
+    if (!page->is_empty())
+        issue_page(igraph::SMALL_PAGE);
 
+    size_t required_ext_pages = static_cast<size_t>(std::floor((num_edges - page_t::MaximumEdgesInLeadPage) / page_t::MaximumEdgesInExtPage)) + 1;
+    size_t offset = 0;
+
+    // Processing a lead page
+    {
+        constexpr size_t capacity = page_t::MaximumEdgesInLeadPage;
+        page->add_slot_unsafe(vid);
+        update_list_buffer(edges, capacity);
+        page->add_adj_elems_for_lead_page_unsafe(0, num_edges, capacity, list_buffer.data());
+        offset += capacity;
+        issue_page(static_cast<igraph::page_flag>(igraph::LARGE_PAGE | igraph::LEAD_PAGE));
+    }
+
+    size_t remained_edges = num_edges - page_t::MaximumEdgesInLeadPage;
+    // Processing extended pages
+    for (size_t i = 0; i < required_ext_pages; ++i)
+    {
+        constexpr size_t capacity = page_t::MaximumEdgesInExtPage;
+        size_t num_edges_per_page = (remained_edges >= capacity) ? capacity : remained_edges;
+        page->add_extended_slot_unsafe(vid);
+        update_list_buffer(edges + offset, num_edges_per_page);
+        page->add_adj_elems_for_ext_page_unsafe(0, num_edges_per_page, list_buffer.data());
+        offset += num_edges_per_page;
+        remained_edges -= num_edges_per_page;
+        issue_page(static_cast<igraph::page_flag>(igraph::LARGE_PAGE | igraph::EXTENDED_PAGE));
+    }
 }
 
 template <typename PAGE_T, typename RID_TABLE_T>
 void db_generator<PAGE_T, RID_TABLE_T>::issue_page(igraph::page_flag flag)
 {
+    page_t* buffer = page_buffer.get();
+    page->set_flags(flag);
+    memmove(&buffer[page_counter++], page.get(), sizeof(page_t));
+    page->clear();
+    if (page_counter == bufsize)
+        flush();
 }
 
 template <typename PAGE_T, typename RID_TABLE_T>
 void db_generator<PAGE_T, RID_TABLE_T>::update_list_buffer(edge_t* edges, size_t num_edges)
 {
+    list_buffer.clear();
+    for (size_t i = 0; i < num_edges; ++i)
+    {
+        typename page_t::adj_element_t elem;
+        elem.adj_page_id = get_page_id(edges[i].dst);
+        elem.adj_offset = get_slot_offset(elem.adj_page_id, edges[i].dst);
+        list_buffer.push_back(elem);
+    }
 }
 
 template <typename PAGE_T, typename RID_TABLE_T>
 typename db_generator<PAGE_T, RID_TABLE_T>::adj_page_id_t db_generator<PAGE_T, RID_TABLE_T>::get_page_id(vertex_id_t vid)
 {
+    for (size_t i = 0; i < rid_table.size(); ++i)
+    {
+        const rid_tuple_t& tuple = rid_table[i];
+        if (tuple.start_vid == vid)
+            return i;
+        if (tuple.start_vid > vid)
+            return i - 1;
+    }
+    // Since the number of vertices is unknown at this point, if the above lookup  phase does not find the corresponding VID, it is assumed to exist on the last page.
+    //TODO: Vertex 갯수를 사전에 알 수 있도록 코드를 추가하고 out_of_index 예외 처리를 추가해야함.
+    return rid_table.size() - 1;
 }
 
 template <typename PAGE_T, typename RID_TABLE_T>
 typename db_generator<PAGE_T, RID_TABLE_T>::adj_offset_t db_generator<PAGE_T, RID_TABLE_T>::get_slot_offset(adj_page_id_t pid, vertex_id_t vid)
 {
+    const rid_tuple_t& tuple = rid_table[pid];
+    return vid - tuple.start_vid;
 }
+
 } // !namespace igraph
 
 #endif // !_INFOGRAPH_TYPE_GENERIC_PAGEDB_GENERATOR_H_

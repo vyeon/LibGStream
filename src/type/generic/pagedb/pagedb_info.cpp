@@ -21,4 +21,11 @@ void pagedb_info::read_from_stream(std::ifstream& ifs)
     ifs.read(reinterpret_cast<char*>(&num_pages), sizeof(decltype(num_pages)));
 }
 
+void pagedb_info::write_to_stream(std::ofstream& ofs)
+{
+    /* Attention: Please refer to "@ Slotted Page Database Information File Representation" in the pagedb.h before modification. */
+    ofs.write(reinterpret_cast<char*>(&num_pages), StringBufferSize);
+    ofs.write(reinterpret_cast<char*>(&num_pages), sizeof(decltype(num_pages)));
+}
+
 } // !namespace igraph

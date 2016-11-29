@@ -29,6 +29,8 @@ public:
     void read_from_file(const char* filepath);
     // read from ifstream
     void read_from_stream(std::ifstream& ifs);
+    // write to ofstream
+    void write_to_stream(std::ofstream& ofs);
     
     static constexpr unsigned int StringBufferSize = 260;
     char name[StringBufferSize];
