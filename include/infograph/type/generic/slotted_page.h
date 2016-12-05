@@ -145,6 +145,20 @@ public:
         adj_page_id_t adj_page_id;
         adj_offset_t  adj_offset;
         PayloadTy     payload;
+        adj_element_t_base() = default;
+        adj_element_t_base(const adj_page_id_t& pid_, const adj_offset_t& offset_, const PayloadTy& payload_):
+            adj_page_id{ pid_ },
+            adj_offset{ offset_ },
+            payload{payload_}
+        {
+            // Nothing to do.
+        }
+        adj_element_t_base(const adj_element_t_base& other)
+        {
+            static_assert(std::is_trivially_copyable<PayloadTy>::value, "Generic Slotted Page: Constraint3. Payload type must be trivially copyable! Please refer to following document http://en.cppreference.com/w/cpp/concept/TriviallyCopyable");
+            memmove(this, &other, sizeof(adj_element_t_base<PayloadTy>));
+        }
+        ~adj_element_t_base() = default;
     };
 
     template <>
@@ -153,10 +167,22 @@ public:
     {
         adj_page_id_t adj_page_id;
         adj_offset_t  adj_offset;
+        adj_element_t_base() = default;
+        adj_element_t_base(const adj_page_id_t& pid_, const adj_offset_t& offset_):
+            adj_page_id {pid_},
+            adj_offset {offset_}
+        {
+            // Nothing to do.
+        }
+        adj_element_t_base(const adj_element_t_base& other)
+        {
+            memmove(this, &other, sizeof(adj_element_t_base<void>));
+        }
+        ~adj_element_t_base() = default;
     };
 
     using adj_element_t = adj_element_t_base<adj_payload_t>;
-
+    
     struct slot_t
     {
         vertex_id_t vertex_id;
@@ -337,9 +363,6 @@ public:
     // This operation is unsafe, require attention to use
     void add_adj_elems_for_ext_page_unsafe(offset_t slot_offset, adj_list_size_t list_size, adj_element_t* elements);
 
-    /* Utility functions */
-    static size_t storable_list_size();
-    static size_t storable_extended_list_size();
     /* Member variables */
 public:
     uint8_t  data_section[DATA_SECTION_SIZE];
@@ -456,20 +479,6 @@ void slotted_page<SLOTTED_PAGE_TEMPLATE_ARGS>::add_adj_elems_for_ext_page_unsafe
         memmove(elem_section, elements, sizeof(adj_element_t) * num_elems_in_page);
         footer.front += sizeof(adj_element_t) * num_elems_in_page;
     }
-}
-
-SLOTTED_PAGE_TEMPLATE
-size_t slotted_page<SLOTTED_PAGE_TEMPLATE_ARGS>::storable_list_size()
-{
-    size_t free_space_for_elems = (DATA_SECTION_SIZE - sizeof(slot_t) - sizeof(adj_list_size_t));
-    return (free_space_for_elems / sizeof(adj_element_t));
-}
-
-SLOTTED_PAGE_TEMPLATE
-size_t slotted_page<SLOTTED_PAGE_TEMPLATE_ARGS>::storable_extended_list_size()
-{
-    size_t free_space_for_elems = (DATA_SECTION_SIZE - sizeof(slot_t));
-    return (free_space_for_elems / sizeof(adj_element_t));
 }
 
 #pragma pack(pop)

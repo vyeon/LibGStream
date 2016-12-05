@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SlottedPage_Tutorial", "SlottedPage_Tutorial\SlottedPage_Tutorial.vcxproj", "{F4950719-13A8-4EDA-9DAF-7E0111A9C2EA}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PageDatabaseGenerator", "PageDatabaseGenerator\PageDatabaseGenerator.vcxproj", "{A719484B-F6B8-4B3C-8F76-E7A62E3707FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -15,6 +17,10 @@ Global
 		{F4950719-13A8-4EDA-9DAF-7E0111A9C2EA}.Debug|x64.Build.0 = Debug|x64
 		{F4950719-13A8-4EDA-9DAF-7E0111A9C2EA}.Release|x64.ActiveCfg = Release|x64
 		{F4950719-13A8-4EDA-9DAF-7E0111A9C2EA}.Release|x64.Build.0 = Release|x64
+		{A719484B-F6B8-4B3C-8F76-E7A62E3707FA}.Debug|x64.ActiveCfg = Debug|x64
+		{A719484B-F6B8-4B3C-8F76-E7A62E3707FA}.Debug|x64.Build.0 = Debug|x64
+		{A719484B-F6B8-4B3C-8F76-E7A62E3707FA}.Release|x64.ActiveCfg = Release|x64
+		{A719484B-F6B8-4B3C-8F76-E7A62E3707FA}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
