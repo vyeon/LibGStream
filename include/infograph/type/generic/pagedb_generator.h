@@ -41,6 +41,8 @@ protected:
     uint64_t vid_counter{ 0 };
     uint64_t num_pages{ 0 };
     std::shared_ptr<page_t> page{ std::make_shared<page_t>() };
+
+public:
     rid_table_t table;
 };
 
