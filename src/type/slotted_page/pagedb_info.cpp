@@ -1,5 +1,4 @@
-#include <infograph/type/generic/pagedb.h>
-#include <fstream>
+#include <infograph/type/slotted_page/pagedb.h>
 
 namespace igraph {
 
@@ -8,7 +7,7 @@ pagedb_info::pagedb_info(const char* filepath)
     read_from_file(filepath);
 }
 
-void pagedb_info::read_from_file(const char* filepath) 
+void pagedb_info::read_from_file(const char* filepath)
 {
     std::ifstream ifs{ filepath, std::ios::in | std::ios::binary };
     read_from_stream(ifs);

@@ -1,7 +1,41 @@
 #ifndef _INFOGRAPH_MPL_H_
 #define _INFOGRAPH_MPL_H_
 
+/* ---------------------------------------------------------------
+**
+** InfoGraph - InfoLab Graph Library
+**
+** mpl.h
+**
+** Author: Seyeon Oh (vee@dgist.ac.kr)
+** ------------------------------------------------------------ */
+
 #include <utility>
+#include <functional>
+
+// Check windows
+#if _WIN32 || _WIN64
+#if _WIN64
+#define ENV64
+#else
+#define ENV32
+#endif
+#endif
+
+// Check GCC
+#if __GNUC__
+#if __x86_64__ || __ppc64__
+#define ENV64
+#else
+#define ENV32
+#endif
+#endif
+
+#if defined ENV64
+using target_arch_size_t = uint64_t;
+#elif defined ENV32
+using target_arch_size_t = uint32_t;
+#endif
 
 namespace igraph {
 
@@ -27,7 +61,7 @@ template <class T>
 void* pvoid_cast(T pointer)
 {
     auto& ptr = pointer;
-    void* addr = *static_cast<void**>(&ptr);
+    void* addr = *reinterpret_cast<void**>(&ptr);
     return addr;
 }
 
@@ -43,7 +77,7 @@ struct int_to_type
 template <class T>
 struct type_to_type
 {
-    using real_type = T;
+    using real_t = T;
     template <class Arg>
     explicit type_to_type(Arg&& arg):
         value(std::forward<Arg>(arg))
@@ -70,8 +104,20 @@ struct is_pair< std::pair< T1, T2 > >
     static const bool value = true;
 };
 
+template <class LHS, class RHS>
+constexpr inline auto sum(LHS&& lhs, RHS&& rhs) -> decltype(lhs + rhs)
+{
+    return lhs + rhs;
+}
+
+template <class Current, class ...Remainder>
+constexpr inline auto sum(Current current, Remainder... rest) -> decltype(current + sum(rest ...))
+{
+    return (current + sum(rest ...));
+}
+
 template <typename T>
-struct tricky_sizeof
+struct _sizeof
 {
     enum
     {
@@ -80,7 +126,7 @@ struct tricky_sizeof
 };
 
 template <>
-struct tricky_sizeof<void>
+struct _sizeof<void>
 {
     enum
     {

@@ -12,15 +12,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\infograph\mpl.h" />
-    <ClInclude Include="include\infograph\type\generic\pagedb.h" />
-    <ClInclude Include="include\infograph\type\generic\pagedb_generator.h" />
-    <ClInclude Include="include\infograph\type\generic\slotted_page.h" />
-    <ClInclude Include="include\infograph\type\generic\slotted_page_helper.h" />
-    <ClInclude Include="include\infograph\type\generic\unsigned_integer.h" />
+    <ClInclude Include="include\infograph\type\slotted_page.h" />
+    <ClInclude Include="include\infograph\type\slotted_page\pagedb.h" />
+    <ClInclude Include="include\infograph\type\slotted_page\pagedb_generator.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="core.cpp" />
-    <ClCompile Include="src\type\generic\pagedb\pagedb_info.cpp" />
+    <ClCompile Include="src\type\slotted_page\pagedb_info.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9DB4616B-AC70-4B76-8F32-71D9CF212495}</ProjectGuid>
@@ -55,13 +52,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)\lib64</OutDir>
+    <OutDir>$(SolutionDir)\lib64\</OutDir>
     <IncludePath>$(SolutionDir)\include;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)\obj\x64\Debug\$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName)-vc140-sgd</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)\lib64</OutDir>
+    <OutDir>$(SolutionDir)\lib64\</OutDir>
     <IncludePath>$(SolutionDir)\include;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)\obj\x64\Release\$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName)-vc140-s</TargetName>

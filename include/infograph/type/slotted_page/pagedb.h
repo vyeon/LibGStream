@@ -1,20 +1,31 @@
-#ifndef _INFOGRAPH_TYPE_GENERIC_PAGEDB_H_
-#define _INFOGRAPH_TYPE_GENERIC_PAGEDB_H_
+#ifndef _INFOGRAPH_PAGEDB_H_
+#define _INFOGRAPH_PAGEDB_H_
 
-#include <infograph/type/generic/slotted_page.h>
+/* ---------------------------------------------------------------
+**
+** InfoGraph - InfoLab Graph Library
+**
+** pagedb.h
+**
+** Author: Seyeon Oh (vee@dgist.ac.kr)
+** ------------------------------------------------------------ */
+
+#include <infograph/type/slotted_page.h>
+#include <vector>
+#include <fstream>
 #include <iterator>
 
 namespace igraph {
 
 /*
- * @ Slotted Page Database Information File Representation
- * 
- * SBS: StringBufferSize: 256
- * 
- * 0 ~ 0 + SBS    : Database name
- * # ~ # + 8      : The number of pages in database
- * 
- */
+* @ Slotted Page Database Information File Representation
+*
+* SBS: StringBufferSize: 256
+*
+* 0 ~ 0 + SBS    : Database name
+* # ~ # + 8      : The number of pages in database
+*
+*/
 
 class pagedb_info
 {
@@ -31,17 +42,17 @@ public:
     void read_from_stream(std::ifstream& ifs);
     // write to ofstream
     void write_to_stream(std::ofstream& ofs);
-    
+
     static constexpr unsigned int StringBufferSize = 260;
     char name[StringBufferSize];
     uint64_t num_pages = 0;
 };
 
-template <typename PAGE_T, 
-          template <typename ELEM_T,
-                    typename = std::allocator<ELEM_T> >
-                    class CONT_T = std::vector >
-class pagedb
+template <typename PAGE_T,
+    template <typename ELEM_T,
+    typename = std::allocator<ELEM_T> >
+    class CONT_T = std::vector >
+    class pagedb
 {
 public:
     using page_t = PAGE_T;
@@ -63,7 +74,7 @@ protected:
 
 template <typename PAGE_T, template <typename ELEM_T, typename> class CONT_T>
 void pagedb<PAGE_T, CONT_T>::read(const char* filepath, const size_t bundle_of_pages/* = 64*/)
-{ 
+{
     // Open a file stream
     std::ifstream ifs{ filepath, std::ios::in | std::ios::binary };
 
@@ -76,7 +87,7 @@ void pagedb<PAGE_T, CONT_T>::read(const char* filepath, const size_t bundle_of_p
         std::vector<page_t> buffer;
         buffer.resize(chunk_size);
         uint64_t counter = 0;
-        while(true)
+        while (true)
         {
             ++counter;
             ifs.read(buffer.data(), chunk_size);
@@ -96,7 +107,7 @@ void pagedb<PAGE_T, CONT_T>::read(const char* filepath, const size_t bundle_of_p
                _info.num_pages,
                bundle_of_pages,
                counter);
-#endif
+#endif // !NDEBUG
     }
 }
 
@@ -106,6 +117,15 @@ const pagedb_info& pagedb<PAGE_T, CONT_T>::info() const
     return _info;
 }
 
-} // !namespace igraph
+template <typename __vertex_id_t, typename __payload_t>
+struct rid_tuple_template
+{
+    using payload_t = __payload_t;
+    using vertex_id_t = __vertex_id_t;
+    vertex_id_t start_vid;
+    payload_t   payload;
+};
+
+} // !nameaspace igraph
 
 #endif // !_INFOGRAPH_PAGEDB_H_
