@@ -30,13 +30,13 @@
 **
 ** Detailed slotted page representation
 ** +-------------------------------------------------------------+
-** | S0 adj-list size | S0 adj-elem #0 | S0 adj-elem #1 | S0 adj-|
+** | S0 record size | S0 adj-elem #0 | S0 adj-elem #1 |   S0 adj-|
 ** +-------------------------------------------------------------+
 ** |elem #2 | S0 adj-elem #3 | ...                               |
 ** +-------------------------------------------------------------+
 ** |                                                             |
 ** +-------------------------------------------------------------+
-** |                ... | S0 adj-elem #N | S1 adj-list size | S1 |
+** |                ... | S0 adj-elem #N | S1 record size |   S1 |
 ** +-------------------------------------------------------------+
 ** | adj-elem #0 | S2 adj-elem #1 | S1 adj-elem #2 | S1 adj-elem |
 ** +-------------------------------------------------------------+
@@ -86,7 +86,7 @@ template <\
     typename __page_id_t,\
     typename __record_offset_t,\
     typename __slot_offset_t,\
-    typename __adj_list_size_t,\
+    typename __record_size_t,\
     size_t   __page_size,\
     typename __edge_payload_t,\
     typename __vertex_payload_t,\
@@ -98,7 +98,7 @@ template <\
     __page_id_t,\
     __record_offset_t,\
     __slot_offset_t,\
-    __adj_list_size_t,\
+    __record_size_t,\
     __page_size,\
     __edge_payload_t,\
     __vertex_payload_t,\
@@ -184,7 +184,7 @@ struct footer
     using page_id_t = __page_id_t;\
     using record_offset_t = __record_offset_t;\
     using slot_offset_t = __slot_offset_t;\
-    using adj_list_size_t = __adj_list_size_t;\
+    using record_size_t = __record_size_t;\
     using edge_payload_t = __edge_payload_t;\
     using vertex_payload_t = __vertex_payload_t;\
     using offset_t = __offset_t;\
@@ -199,7 +199,7 @@ struct footer
     using page_id_t = typename PAGE_T::page_id_t;\
     using record_offset_t = typename PAGE_T::record_offset_t;\
     using slot_offset_t = typename PAGE_T::slot_offset_t;\
-    using adj_list_size_t = typename PAGE_T::adj_list_size_t;\
+    using record_size_t = typename PAGE_T::record_size_t;\
     using edge_payload_t = typename PAGE_T::edge_payload_t;\
     using vertex_payload_t = typename PAGE_T::vertex_payload_t;\
     using offset_t = typename PAGE_T::offset_t;\
@@ -214,7 +214,7 @@ struct footer
     static constexpr ___size_t EdgePayloadSize = mpl::_sizeof<edge_payload_t>::value;\
     static constexpr ___size_t VertexPayloadSize = mpl::_sizeof<vertex_payload_t>::value;\
     static constexpr ___size_t DataSectionSize = PageSize - sizeof(footer_t);\
-    static constexpr ___size_t MaximumEdgesInHeadPage = (DataSectionSize - sizeof(slot_t) - sizeof(adj_list_size_t)) / sizeof(adj_list_elem_t);\
+    static constexpr ___size_t MaximumEdgesInHeadPage = (DataSectionSize - sizeof(slot_t) - sizeof(record_size_t)) / sizeof(adj_list_elem_t);\
     static constexpr ___size_t MaximumEdgesInExtPage = (DataSectionSize - sizeof(slot_t)) / sizeof(adj_list_elem_t);\
     static constexpr ___size_t SlotSize = sizeof(slot_t)
 
@@ -233,7 +233,7 @@ template <
     typename __page_id_t,
     typename __record_offset_t,
     typename __slot_offset_t,
-    typename __adj_list_size_t,
+    typename __record_size_t,
     size_t   __page_size,
     typename __edge_payload_t = void,
     typename __vertex_payload_t = void,
@@ -284,21 +284,21 @@ public:
     {
         return *reinterpret_cast<slot_t*>(&this->data_section[DataSectionSize - (sizeof(slot_t) * (offset + 1))]);
     }
-    inline adj_list_size_t& list_size(const slot_t& slot) 
+    inline record_size_t& record_size(const slot_t& slot) 
     {
-        return *reinterpret_cast<adj_list_size_t*>(&data_section[slot.record_offset]);
+        return *reinterpret_cast<record_size_t*>(&data_section[slot.record_offset]);
     }
-    inline adj_list_size_t& list_size(const offset_t slot_offset) 
+    inline record_size_t& record_size(const offset_t slot_offset) 
     {
-        return this->list_size(slot(slot_offset));
+        return this->record_size(slot(slot_offset));
     }
     inline adj_list_elem_t* list(const slot_t& slot) 
     {
-        return reinterpret_cast<adj_list_elem_t*>(&data_section[slot.record_offset + sizeof(adj_list_size_t)]);
+        return reinterpret_cast<adj_list_elem_t*>(&data_section[slot.record_offset + sizeof(record_size_t)]);
     }
     inline adj_list_elem_t* list(const offset_t slot_offset) 
     {
-        return reinterpret_cast<adj_list_elem_t*>(&data_section[slot(slot_offset).record_offset + sizeof(adj_list_size_t)]);
+        return reinterpret_cast<adj_list_elem_t*>(&data_section[slot(slot_offset).record_offset + sizeof(record_size_t)]);
     }
     inline adj_list_elem_t* list_ext(const slot_t& slot)
     {
@@ -366,7 +366,7 @@ template <
     typename __page_id_t,
     typename __record_offset_t,
     typename __slot_offset_t,
-    typename __adj_list_size_t,
+    typename __record_size_t,
     size_t   __page_size,
     typename __edge_payload_t = void,
     typename __vertex_payload_t = void,
@@ -402,7 +402,7 @@ public:
 
     /// Scan: Scan the free space of a page and returns a couple of information as follows
     // (1) Whether this page can store a new slot. <Boolean>
-    // (2) An available adjacency list-size of the new slot. (If (1) is false, the value is 0.) <page_cnt_t:size-type>
+    // (2) An available record size of the new slot. (If (1) is false, the value is 0.) <page_cnt_t:size-type>
     std::pair<bool/* (1) */, ___size_t /* (2) */> scan() const;
     /// Scan for extended page
     std::pair<bool/* (1) */, ___size_t /* (2) */> scan_ext() const;
@@ -429,15 +429,15 @@ public:
 
     /// Add list: Add a adjacency list to slot[offset]
     /// Add list for a Small Page (SP)
-    void add_list_sp(offset_t slot_offset, adj_list_elem_t* elem_arr, ___size_t list_size);
+    void add_list_sp(offset_t slot_offset, adj_list_elem_t* elem_arr, ___size_t record_size);
     /// Add list for a head of Large Pages (LP-head)
-    void add_list_lp_head(___size_t list_size, adj_list_elem_t* elem_arr, ___size_t num_elems_in_page);
+    void add_list_lp_head(___size_t record_size, adj_list_elem_t* elem_arr, ___size_t num_elems_in_page);
     /// Add list for extended part of Large pages (LP-ext)
     void add_list_lp_ext(adj_list_elem_t* elem_arr, ___size_t num_elems_in_page);
 
     /// Add dummy list
-    void add_dummy_list_sp(offset_t slot_offset, ___size_t list_size);
-    void add_dummy_list_lp_head(___size_t list_size, ___size_t num_elems_in_page);
+    void add_dummy_list_sp(offset_t slot_offset, ___size_t record_size);
+    void add_dummy_list_lp_head(___size_t record_size, ___size_t num_elems_in_page);
     void add_dummy_list_lp_ext(___size_t num_elems_in_page);
 
     /// Utilites
@@ -469,9 +469,9 @@ SLOTTED_PAGE_TEMPLATE
 std::pair<bool/* (1) */, typename SLOTTED_PAGE_BUILDER::___size_t /* (2) */> SLOTTED_PAGE_BUILDER::scan() const
 {
     auto free_space = this->footer.rear - this->footer.front;
-    if (free_space < (sizeof(slot_t) + sizeof(adj_list_size_t)))
+    if (free_space < (sizeof(slot_t) + sizeof(record_size_t)))
         return std::make_pair(false, 0); // The page does not have enough space to store new slot.
-    free_space -= (sizeof(slot_t) + sizeof(adj_list_size_t));
+    free_space -= (sizeof(slot_t) + sizeof(record_size_t));
     return std::make_pair(true, static_cast<___size_t>(free_space / sizeof(adj_list_elem_t)));
 }
 
@@ -493,7 +493,7 @@ typename std::enable_if<std::is_void<PayloadTy>::value, __offset_t>::type SLOTTE
     slot_t& slot = reinterpret_cast<slot_t&>(this->data_section[this->footer.rear]);
     slot.record_offset = static_cast<record_offset_t>(this->footer.front);
     slot.vertex_id = vertex_id;
-    this->footer.front += sizeof(adj_list_size_t);
+    this->footer.front += sizeof(record_size_t);
     return this->number_of_slots() - 1;
 }
 
@@ -506,7 +506,7 @@ typename SLOTTED_PAGE_BUILDER::offset_t SLOTTED_PAGE_BUILDER::add_slot(vertex_id
     slot.vertex_id = vertex_id;
     slot.record_offset = static_cast<record_offset_t>(this->footer.front);
     slot.vertex_payload_t = payload;
-    this->footer.front += sizeof(adj_list_size_t);
+    this->footer.front += sizeof(record_size_t);
     return this->number_of_slots() - 1;
 }
 
@@ -537,7 +537,7 @@ SLOTTED_PAGE_TEMPLATE
 typename SLOTTED_PAGE_BUILDER::offset_t SLOTTED_PAGE_BUILDER::add_dummy_slot()
 {
     this->footer.rear -= sizeof(slot_t);
-    this->footer.front += sizeof(adj_list_size_t);
+    this->footer.front += sizeof(record_size_t);
     return this->number_of_slots() - 1;
 }
 
@@ -549,19 +549,19 @@ typename SLOTTED_PAGE_BUILDER::offset_t SLOTTED_PAGE_BUILDER::add_dummy_slot_ext
 }
 
 SLOTTED_PAGE_TEMPLATE
-void SLOTTED_PAGE_BUILDER::add_list_sp(const offset_t slot_offset, adj_list_elem_t* elem_arr, ___size_t list_size)
+void SLOTTED_PAGE_BUILDER::add_list_sp(const offset_t slot_offset, adj_list_elem_t* elem_arr, ___size_t record_size)
 {
     slot_t& slot = this->slot(slot_offset);
-    this->list_size(slot) = static_cast<adj_list_size_t>(list_size);
-    memmove(this->list(slot), elem_arr, sizeof(adj_list_elem_t) * list_size);
-    this->footer.front += static_cast<decltype(this->footer.front)>(sizeof(adj_list_elem_t) * list_size);
+    this->record_size(slot) = static_cast<record_size_t>(record_size);
+    memmove(this->list(slot), elem_arr, sizeof(adj_list_elem_t) * record_size);
+    this->footer.front += static_cast<decltype(this->footer.front)>(sizeof(adj_list_elem_t) * record_size);
 }
 
 SLOTTED_PAGE_TEMPLATE
-void SLOTTED_PAGE_BUILDER::add_list_lp_head(___size_t list_size, adj_list_elem_t* elem_arr, ___size_t num_elems_in_page)
+void SLOTTED_PAGE_BUILDER::add_list_lp_head(___size_t record_size, adj_list_elem_t* elem_arr, ___size_t num_elems_in_page)
 {
     slot_t& slot = this->slot(0);
-    this->list_size(slot) = static_cast<adj_list_size_t>(list_size);
+    this->record_size(slot) = static_cast<record_size_t>(record_size);
     memmove(this->list(slot), elem_arr, sizeof(adj_list_elem_t) * num_elems_in_page);
     this->footer.front += static_cast<decltype(this->footer.front)>(sizeof(adj_list_elem_t) * num_elems_in_page);
 }
@@ -575,18 +575,18 @@ void SLOTTED_PAGE_BUILDER::add_list_lp_ext(adj_list_elem_t* elem_arr, ___size_t 
 }
 
 SLOTTED_PAGE_TEMPLATE
-void SLOTTED_PAGE_BUILDER::add_dummy_list_sp(const offset_t slot_offset, ___size_t list_size)
+void SLOTTED_PAGE_BUILDER::add_dummy_list_sp(const offset_t slot_offset, ___size_t record_size)
 {
     slot_t& slot = this->slot(slot_offset);
-    this->list_size(slot.record_offset) = static_cast<adj_list_size_t>(list_size);
-    this->footer.front += static_cast<offset_t>(sizeof(adj_list_elem_t) * list_size);
+    this->record_size(slot.record_offset) = static_cast<record_size_t>(record_size);
+    this->footer.front += static_cast<offset_t>(sizeof(adj_list_elem_t) * record_size);
 }
 
 SLOTTED_PAGE_TEMPLATE
-void SLOTTED_PAGE_BUILDER::add_dummy_list_lp_head(___size_t list_size, ___size_t num_elems_in_page)
+void SLOTTED_PAGE_BUILDER::add_dummy_list_lp_head(___size_t record_size, ___size_t num_elems_in_page)
 {
     slot_t& slot = this->slot(0);
-    this->list_size(slot.record_offset) = list_size;
+    this->record_size(slot.record_offset) = record_size;
     this->footer.front += sizeof(adj_list_elem_t) * num_elems_in_page;
 }
 

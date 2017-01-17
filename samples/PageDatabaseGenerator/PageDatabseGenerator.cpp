@@ -4,7 +4,7 @@ using vertex_id_t = uint8_t;
 using page_id_t = uint8_t;
 using record_offset_t = uint8_t;
 using slot_offset_t = uint8_t;
-using adj_list_size_t = uint8_t;
+using record_size_t = uint8_t;
 using edge_payload_t = uint8_t;
 using vertex_payload_t = uint8_t;
 constexpr size_t PageSize = 64;
@@ -12,8 +12,8 @@ constexpr size_t PageSize = 64;
 using vertex_t = igraph::vertex_template<vertex_id_t, edge_payload_t>;
 using edge_t = igraph::edge_template<vertex_id_t, edge_payload_t>;
 
-using page_t = igraph::slotted_page<vertex_id_t, page_id_t, record_offset_t, slot_offset_t, adj_list_size_t, PageSize>;
-using builder_t = igraph::slotted_page_builder<vertex_id_t, page_id_t, record_offset_t, slot_offset_t, adj_list_size_t, PageSize, edge_payload_t, vertex_payload_t>;
+using page_t = igraph::slotted_page<vertex_id_t, page_id_t, record_offset_t, slot_offset_t, record_size_t, PageSize>;
+using builder_t = igraph::slotted_page_builder<vertex_id_t, page_id_t, record_offset_t, slot_offset_t, record_size_t, PageSize, edge_payload_t, vertex_payload_t>;
 using rid_table_generator_t = igraph::rid_table_generator<builder_t>;
 using pagedb_generator_t = igraph::pagedb_generator<builder_t, rid_table_generator_t::rid_table_t>;
 
