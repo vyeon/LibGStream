@@ -30,6 +30,10 @@ public:
     using rid_table_t = cont_t;
     using edge_t = edge_template<vertex_id_t, edge_payload_t>;
 
+    using edgeset_t = std::vector<edge_t>;
+    using iteration_result = std::pair<edgeset_t /* sorted vertex #'s edgeset */, vertex_id_t /* max_vid */>;
+    using iterator_t = std::function< iteration_result(std::ifstream&) >;
+    rid_table_t generate(std::ifstream& ifs, iterator_t iterator);
     rid_table_t generate(edge_t* sorted_edges, ___size_t num_edges);
 
 protected:
@@ -50,6 +54,41 @@ protected:
 
 #define RID_TABLE_GENERATOR_TEMPLATE template <typename PAGE_T, template <typename ELEM_T, typename> class CONT_T>
 #define RID_TABLE_GENERATOR rid_table_generator<PAGE_T, CONT_T>
+
+
+RID_TABLE_GENERATOR_TEMPLATE
+typename RID_TABLE_GENERATOR::rid_table_t RID_TABLE_GENERATOR::generate(std::ifstream& ifs, iterator_t iterator)
+{
+    rid_table_t table;
+    vertex_id_t vid;
+    vertex_id_t src;
+    vertex_id_t max_vid;
+
+    // Init phase
+    iteration_result result = iterator(ifs);
+    if (0 == result.first.size())
+        return table; // initialize failed; returns a empty table
+    src = result.first[0].src;
+    vid = src;
+    max_vid = result.second;
+    
+    do
+    {
+        iteration_per_vertex(table, result.first.size());
+        if (vid > (src + 1))
+            for (vertex_id_t id = src + 1; id <= vid; ++id)
+                iteration_per_vertex(table, /*id,*/ 0);
+        vid += 1;
+
+        result = iterator(ifs);
+        if (0 == result.first.size())
+            break; // parsing error?
+        src = result.first[0].src;
+        max_vid = result.second;
+    } while (!ifs.eof());
+
+    return table;
+}
 
 RID_TABLE_GENERATOR_TEMPLATE
 typename RID_TABLE_GENERATOR::rid_table_t RID_TABLE_GENERATOR::generate(edge_t* sorted_edges, ___size_t num_edges)
