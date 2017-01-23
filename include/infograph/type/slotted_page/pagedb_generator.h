@@ -15,6 +15,12 @@
 
 namespace igraph {
 
+enum class generator_error_t
+{
+    success,
+    init_failed_empty_edgeset,
+};
+
 template <typename PageBuilderTy,
     template <typename ELEM_T,
     typename = std::allocator<ELEM_T> >
@@ -32,11 +38,12 @@ public:
 
     using edgeset_t = std::vector<edge_t>;
     using iteration_result = std::pair<edgeset_t /* sorted vertex #'s edgeset */, vertex_id_t /* max_vid */>;
-    using iterator_t = std::function< iteration_result(std::ifstream&) >;
-    rid_table_t generate(std::ifstream& ifs, iterator_t iterator);
+    using edge_iterator_t = std::function< iteration_result() >;
+    std::pair<generator_error_t /* error info */, rid_table_t /* result table */> generate(edge_iterator_t edge_iterator);
     rid_table_t generate(edge_t* sorted_edges, ___size_t num_edges);
 
 protected:
+    void init();
     void iteration_per_vertex(rid_table_t& out_table, ___size_t num_edges);
     void flush(rid_table_t& table);
     void small_page_iteration(rid_table_t& table, ___size_t num_edges);
@@ -45,49 +52,63 @@ protected:
     void issue_lp_head(rid_table_t& table, ___size_t num_related);
     void issue_lp_exts(rid_table_t& table, ___size_t num_ext_pages); 
 
-    vertex_id_t next_svid{ 0 };
-    vertex_id_t vid_counter{ 0 };
-    ___size_t  num_pages{ 0 };
+    vertex_id_t next_svid;
+    vertex_id_t vid_counter;
+    ___size_t  num_pages;
     std::shared_ptr<builder_t> page{ std::make_shared<builder_t>() };
 };
-
 
 #define RID_TABLE_GENERATOR_TEMPLATE template <typename PAGE_T, template <typename ELEM_T, typename> class CONT_T>
 #define RID_TABLE_GENERATOR rid_table_generator<PAGE_T, CONT_T>
 
+RID_TABLE_GENERATOR_TEMPLATE
+void RID_TABLE_GENERATOR::init()
+{
+    next_svid = 0;
+    vid_counter = 0;
+    num_pages = 0;
+}
 
 RID_TABLE_GENERATOR_TEMPLATE
-typename RID_TABLE_GENERATOR::rid_table_t RID_TABLE_GENERATOR::generate(std::ifstream& ifs, iterator_t iterator)
+std::pair<generator_error_t, typename RID_TABLE_GENERATOR::rid_table_t> RID_TABLE_GENERATOR::generate(edge_iterator_t iterator)
 {
     rid_table_t table;
     vertex_id_t vid;
-    vertex_id_t src;
     vertex_id_t max_vid;
 
     // Init phase
-    iteration_result result = iterator(ifs);
+    this->init();
+    iteration_result result = iterator();
     if (0 == result.first.size())
-        return table; // initialize failed; returns a empty table
-    src = result.first[0].src;
-    vid = src;
+        return std::make_pair(generator_error_t::init_failed_empty_edgeset, table); // initialize failed; returns a empty table
+    vid = result.first[0].src;
     max_vid = result.second;
     
+    // Iteration
     do
     {
-        iteration_per_vertex(table, result.first.size());
-        if (vid > (src + 1))
-            for (vertex_id_t id = src + 1; id <= vid; ++id)
-                iteration_per_vertex(table, /*id,*/ 0);
+        iteration_per_vertex(table, result.first.size()); 
         vid += 1;
 
-        result = iterator(ifs);
+        result = iterator();
         if (0 == result.first.size())
-            break; // parsing error?
-        src = result.first[0].src;
-        max_vid = result.second;
-    } while (!ifs.eof());
+            break; // eof
 
-    return table;
+        if (result.first[0].src > vid)
+        {
+            for (vertex_id_t id = vid; id < result.first[0].src; ++id)
+                iteration_per_vertex(table, 0);
+            vid = result.first[0].src;
+        }
+        
+        if (result.second > max_vid) 
+            max_vid = result.second;
+    } while (true);
+
+    while (max_vid >= vid++)
+            iteration_per_vertex(table, 0);
+    flush(table);
+    return std::make_pair(generator_error_t::success, table);
 }
 
 RID_TABLE_GENERATOR_TEMPLATE
@@ -97,7 +118,7 @@ typename RID_TABLE_GENERATOR::rid_table_t RID_TABLE_GENERATOR::generate(edge_t* 
     vertex_id_t src = sorted_edges[0].src;
     vertex_id_t max = (src > sorted_edges[0].dst) ? src : sorted_edges[0].dst;
     ___size_t size = 0;
-    
+
     auto on_vertex_changed = [this, &table, &src, &size](vertex_id_t new_vid)
     {
         iteration_per_vertex(table, /*src,*/ size);
@@ -106,6 +127,8 @@ typename RID_TABLE_GENERATOR::rid_table_t RID_TABLE_GENERATOR::generate(edge_t* 
             for (vertex_id_t id = src + 1; id <= new_vid; ++id)
                 iteration_per_vertex(table, /*id,*/ 0);
     };
+
+    this->init();
 
     for (___size_t i = 0; i < num_edges; ++i)
     {
@@ -234,6 +257,19 @@ public:
 
     pagedb_generator(rid_table_t& rid_table_);
     
+    using edgeset_t = std::vector<edge_t>;
+    using edge_iteration_result_t = std::pair<edgeset_t /* sorted vertex #'s edgeset */, vertex_id_t /* max_vid */>;
+    using edge_iterator_t = std::function< edge_iteration_result_t() >;
+    using vertex_iteration_result_t = std::pair<bool /* success or failure */, vertex_t /* vertex */>;
+    using vertex_iterator_t = std::function< vertex_iteration_result_t() >;
+    
+    // Enabled if vertex_payload_t is void type.
+    template <typename PayloadTy = vertex_payload_t>
+    typename std::enable_if<std::is_void<PayloadTy>::value, generator_error_t>::type generate(edge_iterator_t edge_iterator, std::ofstream& ofs);
+    // Enabled if vertex_payload_t is non-void type.
+    template <typename PayloadTy = vertex_payload_t>
+    typename std::enable_if<!std::is_void<PayloadTy>::value, generator_error_t>::type generate(edge_iterator_t edge_iterator, vertex_iterator_t vertex_iterator, vertex_payload_t default_slot_payload, std::ofstream& ofs);
+
     // Enabled if vertex_payload_t is void type.
     template <typename PayloadTy = vertex_payload_t>
     typename std::enable_if<std::is_void<PayloadTy>::value>::type generate(std::ofstream& ofs, edge_t* sorted_edges, ___size_t num_edges);
@@ -242,6 +278,7 @@ public:
     typename std::enable_if<!std::is_void<PayloadTy>::value>::type generate(std::ofstream& ofs, vertex_t* sorted_vertices, edge_t* sorted_edges, ___size_t num_edges);
 
 protected:
+    void init();
     void iteration_per_vertex(std::ofstream& ofs, const vertex_t& vertex, edge_t* edges, ___size_t num_edges);
     void flush(std::ofstream& ofs);
     void small_page_iteration(std::ofstream& ofs, const vertex_t& vertex, edge_t* edges, ___size_t num_edges);
@@ -249,9 +286,9 @@ protected:
     void issue_page(std::ofstream& ofs, page_flag_t flags);
     void update_list_buffer(edge_t* edges, ___size_t num_edges);
 
-    rid_table_t& rid_table;
-    ___size_t  vid_counter{ 0 };
-    ___size_t  num_pages{ 0 };
+     rid_table_t& rid_table;
+    ___size_t  vid_counter;
+    ___size_t  num_pages;
     std::vector<adj_list_elem_t> list_buffer;
     std::shared_ptr<builder_t> page{ std::make_shared<builder_t>() };
 };
@@ -264,6 +301,123 @@ PAGEDB_GENERATOR::pagedb_generator(rid_table_t& rid_table_):
     rid_table{ rid_table_ }
 {
     
+}
+
+PAGEDB_GENERATOR_TEMPALTE
+void PAGEDB_GENERATOR::init()
+{
+    vid_counter = 0;
+    num_pages = 0;
+}
+
+PAGEDB_GENERATOR_TEMPALTE
+template <typename PayloadTy>
+typename std::enable_if<std::is_void<PayloadTy>::value, generator_error_t>::type PAGEDB_GENERATOR::generate(edge_iterator_t edge_iterator, std::ofstream& ofs)
+{
+    vertex_id_t vid;
+    vertex_id_t max_vid;
+
+    // Init phase
+    this->init();
+    edge_iteration_result_t result = edge_iterator();
+    if (0 == result.first.size())
+        return generator_error_t::init_failed_empty_edgeset; // initialize failed;
+    vid = result.first[0].src;
+    max_vid = result.second;
+
+    // Iteration
+    do
+    {
+        iteration_per_vertex(ofs, vertex_t{ vid }, result.first.data(), result.first.size());
+        vid += 1;
+
+        result = edge_iterator();
+        if (0 == result.first.size())
+            break; // parsing error?
+
+        if (result.first[0].src > vid)
+        {
+            for (vertex_id_t id = vid; id < result.first[0].src; ++id)
+                iteration_per_vertex(ofs, vertex_t{ id }, result.first.data(), 0);
+            vid = result.first[0].src;
+        }
+            
+        if (result.second > max_vid)
+            max_vid = result.second;
+    }
+    while (true);
+
+    while (max_vid >= vid)
+        iteration_per_vertex(ofs, vertex_t{ vid++ }, nullptr, 0);
+
+    flush(ofs);
+    return generator_error_t::success;
+}
+
+PAGEDB_GENERATOR_TEMPALTE
+template <typename PayloadTy>
+typename std::enable_if<!std::is_void<PayloadTy>::value, generator_error_t>::type PAGEDB_GENERATOR::generate(edge_iterator_t edge_iterator, vertex_iterator_t vertex_iterator, vertex_payload_t default_slot_payload, std::ofstream& ofs)
+{
+    vertex_id_t vid;
+    vertex_id_t max_vid;
+
+    // Init phase
+    this->init();
+    edge_iteration_result_t edge_iter_result = edge_iterator();
+    vertex_iteration_result_t vertex_iter_result = vertex_iterator();
+    if (0 == edge_iter_result.first.size())
+        return generator_error_t::init_failed_empty_edgeset; // initialize failed;
+    bool& wv_enabled = vertex_iter_result.first;
+    vertex_t& wv = vertex_iter_result.second;
+    vid = edge_iter_result.first[0].src;
+    
+    max_vid = edge_iter_result.second;
+
+    // Iteration
+    do
+    {
+        if (!wv_enabled || wv.vertex_id != vid)
+        {
+            iteration_per_vertex(ofs, vertex_t{ vid, default_slot_payload }, edge_iter_result.first.data(), edge_iter_result.first.size());
+            //printf("[DEBUG] Default slot payload applied!\n");
+        }
+        else
+        {
+            iteration_per_vertex(ofs, wv, edge_iter_result.first.data(), edge_iter_result.first.size());
+            vertex_iter_result = vertex_iterator();
+        }
+        vid += 1; 
+
+        edge_iter_result = edge_iterator();
+        if (0 == edge_iter_result.first.size())
+            break; // eof
+
+        if (edge_iter_result.first[0].src > vid)
+        {
+            for (vertex_id_t id = vid; id < edge_iter_result.first[0].src; ++id)
+                iteration_per_vertex(ofs, vertex_t{ id, default_slot_payload }, nullptr, 0);
+            vid = edge_iter_result.first[0].src;
+        }
+
+        if (edge_iter_result.second > max_vid)
+            max_vid = edge_iter_result.second;
+    }
+    while (true);
+
+    while (max_vid >= vid)
+    {
+        if (!wv_enabled || wv.vertex_id != vid)
+            iteration_per_vertex(ofs, vertex_t{ vid, default_slot_payload }, nullptr, 0);
+        else
+        {
+            iteration_per_vertex(ofs, wv, nullptr, 0);
+            vertex_iter_result = vertex_iterator();
+        }
+        vid += 1;
+    }
+
+    flush(ofs);
+    return generator_error_t::success;
 }
 
 PAGEDB_GENERATOR_TEMPALTE
@@ -423,6 +577,7 @@ void PAGEDB_GENERATOR::issue_page(std::ofstream& ofs, page_flag_t flags)
     builder_t* raw_ptr = page.get();
     ofs.write(reinterpret_cast<char*>(raw_ptr), PageSize);
     page->clear();
+    ++num_pages;
 }
 
 PAGEDB_GENERATOR_TEMPALTE

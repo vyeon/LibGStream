@@ -11,7 +11,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="PageDatabseGenerator.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="WEWV.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="wewv_edges.txt" />
+    <Text Include="wewv_vertices.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="test.h" />
+    <ClInclude Include="utility.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{a719484b-f6b8-4b3c-8f76-e7a62e3707fa}</ProjectGuid>
