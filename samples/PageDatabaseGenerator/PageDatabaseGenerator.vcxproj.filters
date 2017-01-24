@@ -28,6 +28,7 @@
   <ItemGroup>
     <Text Include="wewv_vertices.txt" />
     <Text Include="wewv_edges.txt" />
+    <Text Include="weuv_edges.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test.h">
