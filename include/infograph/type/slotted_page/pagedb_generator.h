@@ -257,14 +257,14 @@ public:
     typename std::enable_if<std::is_void<PayloadTy>::value, generator_error_t>::type generate(edge_iterator_t edge_iterator, std::ostream& os);
     // Enabled if vertex_payload_t is non-void type.
     template <typename PayloadTy = vertex_payload_t>
-    typename std::enable_if<!std::is_void<PayloadTy>::value, generator_error_t>::type generate(edge_iterator_t edge_iterator, vertex_iterator_t vertex_iterator, vertex_payload_t default_slot_payload, std::ostream& os);
+    typename std::enable_if<!std::is_void<PayloadTy>::value, generator_error_t>::type generate(edge_iterator_t edge_iterator, vertex_iterator_t vertex_iterator, typename std::enable_if< !std::is_void<PayloadTy>::value, PayloadTy >::type default_slot_payload, std::ostream& os);
 
     // Enabled if vertex_payload_t is void type.
     template <typename PayloadTy = vertex_payload_t>
     typename std::enable_if<std::is_void<PayloadTy>::value>::type generate(edge_t* sorted_edges, ___size_t num_edges, std::ostream& os);
     // Enabled if vertex_payload_t is non-void type.
     template <typename PayloadTy = vertex_payload_t>
-    typename std::enable_if<!std::is_void<PayloadTy>::value>::type generate(edge_t* sorted_edges, ___size_t num_edges, vertex_t* sorted_vertices, ___size_t num_vertices, vertex_payload_t default_slot_payload, std::ostream& os);
+    typename std::enable_if<!std::is_void<PayloadTy>::value>::type generate(edge_t* sorted_edges, ___size_t num_edges, vertex_t* sorted_vertices, ___size_t num_vertices, typename std::enable_if< !std::is_void<PayloadTy>::value, PayloadTy >::type default_slot_payload, std::ostream& os);
 
 protected:
     void init();
@@ -345,7 +345,7 @@ typename std::enable_if<std::is_void<PayloadTy>::value, generator_error_t>::type
 
 PAGEDB_GENERATOR_TEMPALTE
 template <typename PayloadTy>
-typename std::enable_if<!std::is_void<PayloadTy>::value, generator_error_t>::type PAGEDB_GENERATOR::generate(edge_iterator_t edge_iterator, vertex_iterator_t vertex_iterator, vertex_payload_t default_slot_payload, std::ostream& os)
+typename std::enable_if<!std::is_void<PayloadTy>::value, generator_error_t>::type PAGEDB_GENERATOR::generate(edge_iterator_t edge_iterator, vertex_iterator_t vertex_iterator, typename std::enable_if< !std::is_void<PayloadTy>::value, PayloadTy >::type default_slot_payload, std::ostream& os)
 {
     vertex_id_t vid;
     vertex_id_t max_vid;
@@ -442,7 +442,7 @@ typename std::enable_if<std::is_void<PayloadTy>::value>::type PAGEDB_GENERATOR::
 
 PAGEDB_GENERATOR_TEMPALTE
 template <typename PayloadTy>
-typename std::enable_if<!std::is_void<PayloadTy>::value>::type PAGEDB_GENERATOR::generate(edge_t* sorted_edges, ___size_t num_total_edges, vertex_t* sorted_vertices, ___size_t num_vertices, vertex_payload_t default_slot_payload, std::ostream& os)
+typename std::enable_if<!std::is_void<PayloadTy>::value>::type PAGEDB_GENERATOR::generate(edge_t* sorted_edges, ___size_t num_total_edges, vertex_t* sorted_vertices, ___size_t num_vertices, typename std::enable_if< !std::is_void<PayloadTy>::value, PayloadTy >::type default_slot_payload, std::ostream& os)
 {
     ___size_t e_off = 0;
     vertex_id_t src;
