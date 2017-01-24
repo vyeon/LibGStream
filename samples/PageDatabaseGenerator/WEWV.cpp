@@ -2,6 +2,7 @@
 #include <infograph/type/slotted_page/pagedb_generator.h>
 #include <sstream>
 
+// Weighted Edge and Weighted Vertex: WEWV
 namespace wewv {
 
 using vertex_id_t = uint8_t;
@@ -117,9 +118,15 @@ vertex_t string_to_vertex(std::string& raw)
     return vertex;
 }
 
-rid_table_generator_t::iteration_result edge_iterator(std::ifstream& ifs)
+/*  Note: The iterator must be a function that does not take parameters.
+    However, following edge_iterator has one parameter named "ifs" for handling input file. 
+    We can convert it to a function without arguments by using std::bind or lambda. */
+
+// edge and vertex iterator must return a pair, which is consist of vertex #'s edgeset (edge-list) and maximum VID value
+// std::pair< std::vector<edge_t> == vertex #'s edgeset, vertex_id_t == maximum VID >
+std::pair< std::vector<edge_t>, vertex_id_t> edge_iterator(std::ifstream& ifs)
 {
-    rid_table_generator_t::edgeset_t edgeset;
+    std::vector<edge_t> edgeset;
     std::string buffer;
 
     // Init phase 
@@ -137,7 +144,6 @@ rid_table_generator_t::iteration_result edge_iterator(std::ifstream& ifs)
     vertex_id_t src = edge.src;
     vertex_id_t max = (edge.src > edge.dst) ? edge.src : edge.dst;
     edgeset.push_back(edge);
-    printf("[E]\t0x%02X -> 0x%02X\tW: 0x%02X\n", edge.src, edge.dst, edge.payload);
     auto old_pos = ifs.tellg(); // mark an old fpos
 
     while (std::getline(ifs, buffer)) // read a text file line by line
@@ -157,13 +163,13 @@ rid_table_generator_t::iteration_result edge_iterator(std::ifstream& ifs)
             max = edge.dst; // update the maximum vid. As the source VID is fixed, we should compare the variable "max" with current destination value. 
         edgeset.push_back(edge);
         old_pos = ifs.tellg();
-
-        printf("[E]\t0x%02X -> 0x%02X\tW: 0x%02X\n", edge.src, edge.dst, edge.payload);
     }
 
     return std::make_pair(edgeset, max);
 }
 
+// Note: vertex iterator must return a pair, which is consist of operation result (success or failure) and a result vertex
+// std::pair< bool == operation result, vertex_t == result vertex >
 std::pair<bool, vertex_t> vertex_iterator(std::ifstream& ifs)
 {
     std::string buffer;
@@ -172,7 +178,6 @@ std::pair<bool, vertex_t> vertex_iterator(std::ifstream& ifs)
         if (buffer[0] == '#' || buffer.length() == 0)
             continue; // comment or empty line
         vertex_t v = string_to_vertex(buffer);
-        printf("[V]\t0x%02X\tW: 0x%02X\n", v.vertex_id, v.payload);
         return std::make_pair(true, v);
     }
     return std::make_pair(false, vertex_t{ 0, 0 });
@@ -180,6 +185,7 @@ std::pair<bool, vertex_t> vertex_iterator(std::ifstream& ifs)
 
 int test_disk_based()
 {
+    puts("[Weighted Edge Weighted Vertex (WEWV) Disk-Based PageDB Geneartion]");
     std::ifstream edge_ifs{ "wewv_edges.txt" };
     std::ifstream vertex_ifs{ "wewv_vertices.txt" };
 
@@ -192,23 +198,29 @@ int test_disk_based()
         puts("Failed to RID Table Generation");
         return -1;
     }
+
+    std::ofstream rid_out{ "wewv_disk_based.rid_table", std::ios::out | std::ios::binary };
     for (auto& tuple : result.second)
     {
         printf("%u\t|\t%llu\n", tuple.start_vid, tuple.payload);
+        rid_out.write(reinterpret_cast<char*>(&tuple.start_vid), sizeof(tuple.start_vid));
+        rid_out.write(reinterpret_cast<char*>(&tuple.payload), sizeof(tuple.payload));
     }
+    printf("\n");
+    rid_out.close();
 
     edge_ifs.clear();
     edge_ifs.seekg(0);
 
     pagedb_generator_t dbgen{ result.second };
-    std::ofstream ofs{ "wewv_disk_based.db", std::ios::out | std::ios::binary };
+    std::ofstream ofs{ "wewv_disk_based.pages", std::ios::out | std::ios::binary };
     dbgen.generate(std::bind(edge_iterator, std::ref(edge_ifs)),        // edge iterator
                    std::bind(vertex_iterator, std::ref(vertex_ifs)),    // vertex iterator
                    0xCC,    // default vertex payload
                    ofs);    // output stream
     ofs.close();
 
-    std::ifstream ifs{ "wewv_disk_based.db", std::ios::in | std::ios::binary };
+    std::ifstream ifs{ "wewv_disk_based.pages", std::ios::in | std::ios::binary };
     char buffer[PageSize] = { 0, };
 
     uint64_t pid = 0;
@@ -233,20 +245,28 @@ int test_disk_based()
 
 int test_in_memory()
 {
+    puts("[Weighted Edge Weighted Vertex (WEWV) In-Memory PageDB Geneartion]");
     rid_table_generator_t rid_gen;
     printf("Slot Size: %llu\n", builder_t::SlotSize);
-    auto table = rid_gen.generate(edge_list.data(), edge_list.size());
-    for (auto& tuple : table)
+    auto result = rid_gen.generate(edge_list.data(), edge_list.size());
+    if (result.first != igraph::generator_error_t::success)
+    {
+        puts("Failed to RID Table Generation");
+        return -1;
+    }
+
+    for (auto& tuple : result.second)
     {
         printf("%u\t|\t%llu\n", tuple.start_vid, tuple.payload);
     }
+    printf("\n");
 
-    pagedb_generator_t dbgen{ table };
-    std::ofstream ofs{ "wewv_inmemory.db", std::ios::out | std::ios::binary };
-    dbgen.generate(ofs, vertex_list.data(), edge_list.data(), edge_list.size());
+    pagedb_generator_t dbgen{ result.second };
+    std::ofstream ofs{ "wewv_inmemory.pages", std::ios::out | std::ios::binary };
+    dbgen.generate(edge_list.data(), edge_list.size(), vertex_list.data(), vertex_list.size(), 0, ofs);
     ofs.close();
 
-    std::ifstream ifs{ "wewv_inmemory.db", std::ios::in | std::ios::binary };
+    std::ifstream ifs{ "wewv_inmemory.pages", std::ios::in | std::ios::binary };
     char buffer[PageSize] = { 0, };
 
     uint64_t pid = 0;
