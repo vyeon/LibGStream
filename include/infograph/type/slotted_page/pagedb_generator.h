@@ -31,7 +31,7 @@ public:
     using builder_t = PageBuilderTy;
     ALIAS_SLOTTED_PAGE_TEMPLATE_TYPEDEFS(builder_t);
     ALIAS_SLOTTED_PAGE_TEMPLATE_CONSTDEFS(builder_t);
-    using rid_tuple_t = rid_tuple_template<vertex_id_t, ___size_t>;
+    using rid_tuple_t = rid_tuple_template<vertex_id_t>;
     using cont_t = CONT_T<rid_tuple_t>;
     using rid_table_t = cont_t;
     using edge_t = edge_template<vertex_id_t, edge_payload_t>;
