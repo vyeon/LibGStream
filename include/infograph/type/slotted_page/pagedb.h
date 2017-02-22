@@ -117,6 +117,7 @@ namespace igraph {
 //    return _info;
 //}
 
+#pragma pack(push, 1)
 template <typename __vertex_id_t, typename __payload_t = uint64_t>
 struct rid_tuple_template
 {
@@ -125,6 +126,7 @@ struct rid_tuple_template
     vertex_id_t start_vid;
     payload_t   payload;
 };
+#pragma pack(pop)
 
 template <typename PAGE_T,
     template <typename ELEM_T,
