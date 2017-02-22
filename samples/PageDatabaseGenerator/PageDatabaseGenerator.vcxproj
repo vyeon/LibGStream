@@ -16,6 +16,7 @@
     <ClCompile Include="WEWV.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="weuv_edges.txt" />
     <Text Include="wewv_edges.txt" />
     <Text Include="wewv_vertices.txt" />
   </ItemGroup>
