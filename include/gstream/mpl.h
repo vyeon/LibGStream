@@ -1,9 +1,9 @@
-#ifndef _INFOGRAPH_MPL_H_
-#define _INFOGRAPH_MPL_H_
+#ifndef _GSTREAM_MPL_H_
+#define _GSTREAM_MPL_H_
 
 /* ---------------------------------------------------------------
 **
-** InfoGraph - InfoLab Graph Library
+** LibGStream - Library of GStream by InfoLab @ DGIST (https://infolab.dgist.ac.kr/)
 **
 ** mpl.h
 **
@@ -37,7 +37,7 @@ using target_arch_size_t = uint64_t;
 using target_arch_size_t = uint32_t;
 #endif
 
-namespace igraph {
+namespace gstream {
 
 namespace mpl {
 
@@ -136,6 +136,6 @@ struct _sizeof<void>
 
 } // !namespace mpl
 
-} // !namespace igraph
+} // !namespace gstream
 
-#endif // !_INFOGRAPH_MPL_H_
+#endif // !_GSTREAM_MPL_H_

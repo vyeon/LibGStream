@@ -11,18 +11,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\infograph\mpl.h" />
-    <ClInclude Include="include\infograph\type\slotted_page.h" />
-    <ClInclude Include="include\infograph\type\slotted_page\pagedb.h" />
-    <ClInclude Include="include\infograph\type\slotted_page\pagedb_generator.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\type\slotted_page\pagedb_info.cpp" />
+    <ClInclude Include="include\gstream\datatype\pagedb.h" />
+    <ClInclude Include="include\gstream\datatype\pagedb_generator.h" />
+    <ClInclude Include="include\gstream\datatype\slotted_page.h" />
+    <ClInclude Include="include\gstream\mpl.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9DB4616B-AC70-4B76-8F32-71D9CF212495}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>InfoGraph</RootNamespace>
+    <RootNamespace>LibGStream</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

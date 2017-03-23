@@ -1,5 +1,5 @@
-#ifndef _INFOGRAPH_SAMPLES_PAGEDB_GENERATOR_TEST_H_
-#define _INFOGRAPH_SAMPLES_PAGEDB_GENERATOR_TEST_H_
+#ifndef _LibGStream_SAMPLES_PAGEDB_GENERATOR_TEST_H_
+#define _LibGStream_SAMPLES_PAGEDB_GENERATOR_TEST_H_
 
 namespace wewv {
 
@@ -15,4 +15,4 @@ int test_in_memory();
 
 } // !namespace weuv
 
-#endif // !_INFOGRAPH_SAMPLES_PAGEDB_GENERATOR_TEST_H_
+#endif // !_LibGStream_SAMPLES_PAGEDB_GENERATOR_TEST_H_

@@ -1,4 +1,4 @@
-#include <infograph/type/slotted_page/pagedb.h>
+#include <LibGStream/type/slotted_page/pagedb.h>
 
 namespace igraph {
 

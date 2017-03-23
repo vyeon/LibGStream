@@ -1,14 +1,14 @@
-﻿#ifndef _INFORGRAPH_TYPE_SLOTTED_PAGE_H_
-#define _INFORGRAPH_TYPE_SLOTTED_PAGE_H_
+﻿#ifndef _GSTREAM_DATATYPE_SLOTTED_PAGE_H_
+#define _GSTREAM_DATATYPE_SLOTTED_PAGE_H_
 #include <cstring>
 #include <cstdint>
 #include <type_traits>
 #include <memory>
-#include <infograph/mpl.h>
+#include <gstream/mpl.h>
 
 /* ---------------------------------------------------------------
 **
-** InfoGraph - InfoLab Graph Library
+** LibGStream - Library of GStream by InfoLab @ DGIST (https://infolab.dgist.ac.kr/)
 **
 ** slotted_page.h
 ** Generic C++ implementation of the "Slotted Page" which is a
@@ -74,7 +74,7 @@
 **
 ** ------------------------------------------------------------ */
 
-namespace igraph {
+namespace gstream {
 
 constexpr size_t SIZE_1KB = 1024u;
 constexpr size_t SIZE_1MB = SIZE_1KB * 1024u;
@@ -704,6 +704,6 @@ struct vertex_template<__vertex_id_t, void>
 
 #pragma pack(pop)
 
-} // !namespace igraph
+} // !namespace gstream
 
-#endif // !_INFORGRAPH_TYPE_SLOTTED_PAGE_H_
+#endif // !_GSTREAM_DATATYPE_SLOTTED_PAGE_H_

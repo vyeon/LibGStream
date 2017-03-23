@@ -61,16 +61,16 @@
     <OutDir>$(SolutionDir)\bin\$(Configuration)-$(PlatformShortName)\</OutDir>
     <IntDir>vsbuild\$(Configuration)-$(PlatformShortName)\</IntDir>
     <TargetName>$(ProjectName)-$(PlatformToolset)-$(PlatformShortName)-$(Configuration)</TargetName>
-    <IncludePath>$(INFOGRAPH_PATH)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(INFOGRAPH_PATH)\lib64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(LibGStream_PATH)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibGStream_PATH)\lib64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)\bin\$(Configuration)-$(PlatformShortName)\</OutDir>
     <IntDir>vsbuild\$(Configuration)-$(PlatformShortName)\</IntDir>
     <TargetName>$(ProjectName)-$(PlatformToolset)-$(PlatformShortName)-$(Configuration)</TargetName>
-    <IncludePath>$(INFOGRAPH_PATH)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(INFOGRAPH_PATH)\lib64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(LibGStream_PATH)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibGStream_PATH)\lib64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -84,7 +84,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>InfoGraph-vc140-sgd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -103,7 +102,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>InfoGraph-vc140-s.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,19 +1,19 @@
-#ifndef _INFOGRAPH_PAGEDB_GEN_H_
-#define _INFOGRAPH_PAGEDB_GEN_H_
+#ifndef _GSTREAM_DATATYPE_PAGEDB_GENERATOR_H_
+#define _GSTREAM_DATATYPE_PAGEDB_GENERATOR_H_
 
 /* ---------------------------------------------------------------
 **
-** InfoGraph - InfoLab Graph Library
+** LibGStream - Library of GStream by InfoLab @ DGIST (https://infolab.dgist.ac.kr/)
 **
 ** pagedb_generator.h
 **
 ** Author: Seyeon Oh (vee@dgist.ac.kr)
 ** ------------------------------------------------------------ */
 
-#include <infograph/type/slotted_page/pagedb.h>
+#include <gstream/datatype/pagedb.h>
 #include <vector>
 
-namespace igraph {
+namespace gstream {
 
 enum class generator_error_t
 {
@@ -574,6 +574,6 @@ void PAGEDB_GENERATOR::update_list_buffer(edge_t* edges, ___size_t num_edges)
 #undef PAGEDB_GENERATOR
 #undef PAGEDB_GENERATOR_TEMPALTE
 
-} // !namespace igraph
+} // !namespace gstream
 
-#endif // !_INFOGRAPH_PAGEDB_GEN_H_
+#endif // !_GSTREAM_DATATYPE_PAGEDB_GENERATOR_H_

@@ -1,4 +1,4 @@
-#include <infograph/type/slotted_page/pagedb.h>
+#include <gstream/datatype/pagedb.h>
 
 // Define meta parameter for page type 
 using vertex_id_t = uint8_t;
@@ -11,18 +11,18 @@ using vertex_payload_t = uint8_t;
 constexpr size_t PageSize = 64;
 
 // Define page type
-using page_t = igraph::slotted_page<vertex_id_t, page_id_t, record_offset_t, slot_offset_t, record_size_t, PageSize, edge_payload_t, vertex_payload_t>;
+using page_t = gstream::slotted_page<vertex_id_t, page_id_t, record_offset_t, slot_offset_t, record_size_t, PageSize, edge_payload_t, vertex_payload_t>;
 // Define container type for storing pages (you can use any type of STL sequential container for constructing RID table, e.g., std::vector, std::list)
 using page_cont_t = std::vector<page_t>;
 // Define RID tuple type
-using rid_tuple_t = igraph::rid_tuple_template<vertex_id_t>;
+using rid_tuple_t = gstream::rid_tuple_template<vertex_id_t>;
 // Define RID table type (you can use any type of STL sequential container for constructing RID table, e.g., std::vector, std::list)
 using rid_table_t = std::vector<rid_tuple_t>;
 
 int main()
 {
-    rid_table_t rid_table = igraph::read_rid_table<rid_tuple_t, std::vector>("wewv.rid_table");
-    page_cont_t pages = igraph::read_pages<page_t, std::vector>("wewv.pages");
+    rid_table_t rid_table = gstream::read_rid_table<rid_tuple_t, std::vector>("wewv.rid_table");
+    page_cont_t pages = gstream::read_pages<page_t, std::vector>("wewv.pages");
     
     printf("# RID Table\n");
     for (auto& tuple : rid_table)

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="gstream">
+      <UniqueIdentifier>{f2c81388-965e-4ebe-8cbf-9d6d5daa54f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gstream\datatype">
+      <UniqueIdentifier>{0b100fd1-dff7-4bdc-9fdd-1339793ce002}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\gstream\mpl.h">
+      <Filter>gstream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gstream\datatype\pagedb_generator.h">
+      <Filter>gstream\datatype</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gstream\datatype\slotted_page.h">
+      <Filter>gstream\datatype</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gstream\datatype\pagedb.h">
+      <Filter>gstream\datatype</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
