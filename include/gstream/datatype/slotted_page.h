@@ -128,28 +128,16 @@ template <typename __page_id_t,
 template <
     typename __page_id_t,
     typename __slot_offset_t>
-    struct adj_list_element<__page_id_t, __slot_offset_t, void>
-{
+    struct adj_list_element<__page_id_t, __slot_offset_t, void> {
     __page_id_t      page_id;
     __slot_offset_t  slot_offset;
-    /*adj_list_elem_base() = default;
-    adj_list_elem_base(const adj_list_elem_base& other):
-    page_id { other.page_id },
-    slot_offset { other.slot_offset },
-    payload { other.payload } { }
-    adj_list_elem_base(const page_id_t& page_id_, const slot_offset_t& slot_offset_, const edge_payload_t payload_):
-    page_id { page_id_ },
-    slot_offset { slot_offset_ },
-    payload { payload_ } { }
-    ~adj_list_elem_base() = default;*/
 };
 
 template <
     typename __vertex_id_t,
     typename __record_offset_t,
     typename __vertex_payload_t>
-    struct slot
-{
+    struct slot {
     __vertex_id_t      vertex_id;
     __record_offset_t  record_offset;
     __vertex_payload_t vertex_payload_t;
@@ -158,8 +146,7 @@ template <
 template <
     typename __vertex_id_t,
     typename __record_offset_t>
-    struct slot<__vertex_id_t, __record_offset_t, void>
-{
+    struct slot<__vertex_id_t, __record_offset_t, void> {
     __vertex_id_t     vertex_id;
     __record_offset_t record_offset;
 };
@@ -167,8 +154,7 @@ template <
 using page_flag_t = uint32_t;
 
 template <typename offset_t>
-struct footer
-{
+struct footer {
     uint32_t    reserved;
     page_flag_t flags;
     offset_t    front;
@@ -239,8 +225,7 @@ template <
     typename __vertex_payload_t = void,
     typename __offset_t = uint32_t
 >
-class slotted_page
-{
+class slotted_page {
     /* Constratint 1. The edge-payload type must be a void type or a Plain old data (POD) type */
     static_assert((std::is_void<__edge_payload_t>::value || std::is_pod<__edge_payload_t>::value),
                   "Generic Slotted Page: Constraint 1. The edge-payload type must be a Plain old data (POD) type");
@@ -265,10 +250,15 @@ public:
     ~slotted_page() = default;
 
     // Operators
-    inline type& operator=(const type& other);
+    inline type& operator=(const type& other)
+	{
+		memmove(this, &other, PageSize);
+		return *this;
+	}
+
     inline uint8_t& operator[](offset_t offset)
     {
-        return data_section[offset];
+	    return data_section[offset];
     }
     inline bool operator==(const type& other)
     {
@@ -352,12 +342,6 @@ SLOTTED_PAGE_TEMPLATE SLOTTED_PAGE::slotted_page(page_flag_t flags)
     footer.flags = flags;
 }
 
-SLOTTED_PAGE_TEMPLATE
-inline typename SLOTTED_PAGE::type& SLOTTED_PAGE::operator=(const type& other)
-{
-    memmove(this, &other, PageSize);
-    return *this;
-}
 #pragma pack (pop)
 
 #pragma pack (push, 1)
@@ -370,10 +354,9 @@ template <
     size_t   __page_size,
     typename __edge_payload_t = void,
     typename __vertex_payload_t = void,
-    typename __offset_t = uint32_t
+    typename __offset_t = uint32_t 
 >
-class slotted_page_builder: public slotted_page<SLOTTED_PAGE_TEMPLATE_ARGS>
-{
+class slotted_page_builder: public slotted_page<SLOTTED_PAGE_TEMPLATE_ARGS> {
 public:
     using page_t = slotted_page<SLOTTED_PAGE_TEMPLATE_ARGS>;
     using type = slotted_page_builder<SLOTTED_PAGE_TEMPLATE_ARGS>;
@@ -614,8 +597,7 @@ void SLOTTED_PAGE_BUILDER::clear()
 template <typename __builder_t, typename __rid_table_t>
 typename __builder_t::page_id_t vid_to_pid(typename __builder_t::vertex_id_t vid, __rid_table_t& table)
 {
-    for (typename __builder_t::___size_t i = 0; i < table.size(); ++i)
-    {
+    for (typename __builder_t::___size_t i = 0; i < table.size(); ++i) {
         const auto& tuple = table[i];
         if (tuple.start_vid == vid)
             return static_cast<typename __builder_t::page_id_t>(i);

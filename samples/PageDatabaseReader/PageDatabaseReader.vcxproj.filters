@@ -19,8 +19,4 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="wewv_vertices.txt" />
-    <Text Include="wewv_edges.txt" />
-  </ItemGroup>
 </Project>

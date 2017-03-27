@@ -2,9 +2,9 @@
 
 int main()
 {
-    wewv::test_in_memory();
-    wewv::test_disk_based();
-    //weuv::test_in_memory();
-    //weuv::test_disk_based();
+    //wewv::wewv_in_memory();
+    wewv::wewv_disk_based();
+    //weuv::weuv_in_memory();
+    weuv::weuv_disk_based();
     return 0;
 }

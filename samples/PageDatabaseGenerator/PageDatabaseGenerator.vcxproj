@@ -28,7 +28,7 @@
     <ProjectGuid>{a719484b-f6b8-4b3c-8f76-e7a62e3707fa}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>PageDatabaseGenerator</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -61,16 +61,14 @@
     <OutDir>$(SolutionDir)\bin\$(Configuration)-$(PlatformShortName)\</OutDir>
     <IntDir>vsbuild\$(Configuration)-$(PlatformShortName)\</IntDir>
     <TargetName>$(ProjectName)-$(PlatformToolset)-$(PlatformShortName)-$(Configuration)</TargetName>
-    <IncludePath>$(LibGStream_PATH)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(LibGStream_PATH)\lib64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\..\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)\bin\$(Configuration)-$(PlatformShortName)\</OutDir>
     <IntDir>vsbuild\$(Configuration)-$(PlatformShortName)\</IntDir>
     <TargetName>$(ProjectName)-$(PlatformToolset)-$(PlatformShortName)-$(Configuration)</TargetName>
-    <IncludePath>$(LibGStream_PATH)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(LibGStream_PATH)\lib64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\..\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

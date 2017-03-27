@@ -21,24 +21,16 @@ using rid_table_t = std::vector<rid_tuple_t>;
 
 int main()
 {
-    rid_table_t rid_table = gstream::read_rid_table<rid_tuple_t, std::vector>("wewv.rid_table");
-    page_cont_t pages = gstream::read_pages<page_t, std::vector>("wewv.pages");
-    
+    rid_table_t rtable = gstream::read_rid_table<rid_tuple_t, std::vector>("wewv.rid_table");
     printf("# RID Table\n");
-    for (auto& tuple : rid_table)
-        printf("%u\t|\t%llu\n", tuple.start_vid, tuple.payload);
+	gstream::print_rid_table(rtable);
 
+    page_cont_t pages = gstream::read_pages<page_t, std::vector>("wewv.pages");
     printf("\n# Pages\n");
-    for (size_t i = 0; i < pages.size(); ++i)
-    {
-        unsigned char* buffer = reinterpret_cast<unsigned char*>(&pages[i]);
+    for (size_t i = 0; i < pages.size(); ++i) {
         printf("page[%llu]--------------------------------\n", i);
-        for (int j = 1; j <= sizeof(page_t); ++j)
-        {
-            printf("0x%02X ", buffer[j - 1]);
-            if (j % 8 == 0)
-                printf("\n");
-        }
+		gstream::print_page(pages[i]);
+		printf("\n");
     }
 
     return 0;

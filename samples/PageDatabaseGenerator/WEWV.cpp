@@ -1,10 +1,11 @@
 #include "utility.h"
-#include <gstream/datatype/pagedb_generator.h>
+#include <gstream/datatype/pagedb.h>
 #include <sstream>
 
 // Weighted Edge and Weighted Vertex: WEWV
 namespace wewv {
 
+/* define page arguments */
 using vertex_id_t = uint8_t;
 using page_id_t = uint8_t;
 using record_offset_t = uint8_t;
@@ -12,17 +13,14 @@ using slot_offset_t = uint8_t;
 using record_size_t = uint8_t;
 using edge_payload_t = uint8_t;
 using vertex_payload_t = uint8_t;
-constexpr size_t PageSize = 64;
+constexpr std::size_t PageSize = 64;
 
-using vertex_t = gstream::vertex_template<vertex_id_t, vertex_payload_t>;
-using edge_t = gstream::edge_template<vertex_id_t, edge_payload_t>;
-
+/* define page type and its helpers (page_traits, generator_traits) */
 using page_t = gstream::slotted_page<vertex_id_t, page_id_t, record_offset_t, slot_offset_t, record_size_t, PageSize, edge_payload_t, vertex_payload_t>;
-using builder_t = gstream::slotted_page_builder<vertex_id_t, page_id_t, record_offset_t, slot_offset_t, record_size_t, PageSize, edge_payload_t, vertex_payload_t>;
-using rid_table_generator_t = gstream::rid_table_generator<builder_t>;
-using pagedb_generator_t = gstream::pagedb_generator<builder_t, rid_table_generator_t::rid_table_t>;
+using page_traits = gstream::page_traits<page_t>;
+using generator_traits = gstream::generator_traits<page_t>;
 
-std::vector<vertex_t> vertex_list
+std::vector<page_traits::vertex_t> wewv_vertex_list
 {
     { 0x0, 0x0 },
     { 0x1, 0x1 },
@@ -45,7 +43,7 @@ std::vector<vertex_t> vertex_list
     { 0x12, 0x12 }
 };
 
-std::vector<edge_t> edge_list
+std::vector<page_traits::edge_t> wewv_edge_list
 {
     // Vertex 0
     { 0x0, 0x1, 0xA },
@@ -87,13 +85,13 @@ std::vector<edge_t> edge_list
     { 0x6, 0x12, 0xE }
 };
 
-edge_t string_to_edge(std::string& raw)
+page_traits::edge_t string_to_wewv_edge(std::string& raw)
 {
     std::string s = utility::trim(raw);
     std::string tok;
     std::istringstream iss{ s }; 
 
-    edge_t edge;
+	page_traits::edge_t edge;
     std::getline(iss, tok, ' ');
     edge.src = static_cast<vertex_id_t>(std::stoul(tok, 0, 0));
     std::getline(iss, tok, ' ');
@@ -103,13 +101,13 @@ edge_t string_to_edge(std::string& raw)
     return edge;
 }
 
-vertex_t string_to_vertex(std::string& raw)
+page_traits::vertex_t string_to_wewv_vertex(std::string& raw)
 {
     std::string s = utility::trim(raw);
     std::string tok;
     std::istringstream iss{ s };
 
-    vertex_t vertex;
+	page_traits::vertex_t vertex;
     std::getline(iss, tok, ' ');
     vertex.vertex_id = static_cast<vertex_id_t>(std::stoul(tok, 0, 0));
     std::getline(iss, tok, ' ');
@@ -124,14 +122,13 @@ vertex_t string_to_vertex(std::string& raw)
 
 // edge and vertex iterator must return a pair, which is consist of vertex #'s edgeset (edge-list) and maximum VID value
 // std::pair< std::vector<edge_t> == vertex #'s edgeset, vertex_id_t == maximum VID >
-std::pair< std::vector<edge_t>, vertex_id_t> edge_iterator(std::ifstream& ifs)
+std::pair< std::vector<page_traits::edge_t>, vertex_id_t> wewv_edge_iterator(std::ifstream& ifs)
 {
-    std::vector<edge_t> edgeset;
+    std::vector<page_traits::edge_t> edgeset;
     std::string buffer;
 
     // Init phase 
-    while (std::getline(ifs, buffer)) // while read a first data elements
-    {
+    while (std::getline(ifs, buffer)) { // while read a first data elements
         if (buffer[0] == '#' || buffer.length() == 0) // token "#" means comment
             continue; // comment or empty line
         else
@@ -140,156 +137,167 @@ std::pair< std::vector<edge_t>, vertex_id_t> edge_iterator(std::ifstream& ifs)
     if (ifs.eof() && 0 == buffer.length())
         return std::make_pair(edgeset, 0); // eof
 
-    edge_t edge = string_to_edge(buffer);
+	page_traits::edge_t edge = string_to_wewv_edge(buffer);
     vertex_id_t src = edge.src;
     vertex_id_t max = (edge.src > edge.dst) ? edge.src : edge.dst;
     edgeset.push_back(edge);
     auto old_pos = ifs.tellg(); // mark an old fpos
 
-    while (std::getline(ifs, buffer)) // read a text file line by line
-    {
-        if (buffer[0] == '#' || buffer.length() == 0)
-        {
+    while (std::getline(ifs, buffer)) { // read a text file line by line 
+        if (buffer[0] == '#' || buffer.length() == 0) {
             old_pos = ifs.tellg(); // update the old fpos
             continue; // comment or empty line
         }
-        edge = string_to_edge(buffer);
-        if (edge.src != src) // check the source vertex id changed
-        {
+        edge = string_to_wewv_edge(buffer);
+        if (edge.src != src) { // check the source vertex id changed
             ifs.seekg(old_pos);
             break; // vertex id is changed, break
         }
-        if (edge.dst > max)
+        if (edge.dst > max) {
             max = edge.dst; // update the maximum vid. As the source VID is fixed, we should compare the variable "max" with current destination value. 
+        }
         edgeset.push_back(edge);
         old_pos = ifs.tellg();
     }
-
     return std::make_pair(edgeset, max);
 }
 
 // Note: vertex iterator must return a pair, which is consist of operation result (success or failure) and a result vertex
 // std::pair< bool == operation result, vertex_t == result vertex >
-std::pair<bool, vertex_t> vertex_iterator(std::ifstream& ifs)
+std::pair<bool, page_traits::vertex_t> wewv_vertex_iterator(std::ifstream& ifs)
 {
     std::string buffer;
     while (std::getline(ifs, buffer)) // read a text file line by line
     {
         if (buffer[0] == '#' || buffer.length() == 0)
             continue; // comment or empty line
-        vertex_t v = string_to_vertex(buffer);
+		page_traits::vertex_t v = string_to_wewv_vertex(buffer);
         return std::make_pair(true, v);
     }
-    return std::make_pair(false, vertex_t{ 0, 0 });
+	// end of iterations
+    return std::make_pair(false, page_traits::vertex_t{} /* unused */);
 }
 
-int test_disk_based()
+int wewv_disk_based()
 {
-    puts("[Weighted Edge Weighted Vertex (WEWV) Disk-Based PageDB Geneartion]");
-    std::ifstream edge_ifs{ "wewv_edges.txt" };
-    std::ifstream vertex_ifs{ "wewv_vertices.txt" };
+	/* begin */
+	puts("@ Weighted Edge Weighted Vertex (WEWV) Disk-Based PageDB Geneartion\n");
 
-    rid_table_generator_t rid_gen;
+	/* section: RID-table generator */
+	{
+		/* open a input file */
+		std::ifstream edge_ifs{ "wewv_edges.txt" }; 
 
-    auto result = rid_gen.generate(std::bind(edge_iterator, std::ref(edge_ifs)));
-    if (result.first != gstream::generator_error_t::success)
-    {
-        puts("Failed to RID Table Generation");
-        return -1;
-    }
+		// create a RID-table generator by gstream::generator_traits
+		generator_traits::rid_table_generator rtable_generator;
+		// call the rid_table_generator::generate method with an edge iterator
+		auto generate_result = rtable_generator.generate(std::bind(wewv_edge_iterator, std::ref(edge_ifs)));
+		// check the generator returns success
+		if (generate_result.error != gstream::generator_error_t::success) {
+			puts("Failed to RID Table Generation");
+			return -1;
+		}
+		// save the RID table to file
+		std::ofstream ofs{ "wewv_disk_based.rid_table", std::ios::out | std::ios::binary };
+		gstream::write_rid_table(generate_result.table, ofs);
+		ofs.close();
+	}
 
-    std::ofstream rid_out{ "wewv_disk_based.rid_table", std::ios::out | std::ios::binary };
-    for (auto& tuple : result.second)
-    {
-        printf("%u\t|\t%llu\n", tuple.start_vid, tuple.payload);
-        rid_out.write(reinterpret_cast<char*>(&tuple.start_vid), sizeof(tuple.start_vid));
-        rid_out.write(reinterpret_cast<char*>(&tuple.payload), sizeof(tuple.payload));
-    }
-    printf("\n");
-    rid_out.close();
+	/* section: PageDB generator */
+	{
+		/* open the input files (WEWV: 2 input files) */
+		std::ifstream edge_ifs{ "wewv_edges.txt" }; // edge list
+		std::ifstream vertex_ifs{ "wewv_vertices.txt" }; // vertex info
 
-    edge_ifs.clear();
-    edge_ifs.seekg(0);
+		// read a RID-table from a file for passing to PageDB generator as a constructor argument
+		auto rid_table = gstream::read_rid_table<generator_traits::rid_tuple_t, std::vector>("wewv_disk_based.rid_table");
+		// create a PageDB generator by gstream::generator_traits with rid_table
+		generator_traits::pagedb_generator pagedb_generator{ rid_table };
+		// call the pagedb_generator::generate method with an in-memory edge list and output stream
+		// * Note: the PageDB generator generates a PageDB and writes it to an output stream immediately
+		std::ofstream ofs{ "wewv_disk_based.pages", std::ios::out | std::ios::binary };
+		pagedb_generator.generate(std::bind(wewv_edge_iterator, std::ref(edge_ifs)),        // edge iterator
+			std::bind(wewv_vertex_iterator, std::ref(vertex_ifs)),    // vertex iterator
+			0xCC,    // default vertex payload
+			ofs);    // output stream
+		ofs.close();
+	}
 
-    pagedb_generator_t dbgen{ result.second };
-    std::ofstream ofs{ "wewv_disk_based.pages", std::ios::out | std::ios::binary };
-    dbgen.generate(std::bind(edge_iterator, std::ref(edge_ifs)),        // edge iterator
-                   std::bind(vertex_iterator, std::ref(vertex_ifs)),    // vertex iterator
-                   0xCC,    // default vertex payload
-                   ofs);    // output stream
-    ofs.close();
+	/* section: print */
+	{
+		// read a RID-table from a file
+		auto rid_table = gstream::read_rid_table<generator_traits::rid_tuple_t, std::vector>("wewv_disk_based.rid_table");
+		// print RID-table
+		printf("# RID-table of WEWV\n");
+		gstream::print_rid_table(rid_table);
 
-    std::ifstream ifs{ "wewv_disk_based.pages", std::ios::in | std::ios::binary };
-    
-    char buffer[PageSize] = { 0, };
-    uint64_t pid = 0;
-    while (!ifs.eof())
-    {
-        memset(buffer, 0, PageSize);
-        ifs.read(buffer, PageSize);
-        printf("gcount: %llu, PID[%llu]\n", ifs.gcount(), pid++);
-
-        for (int i = 1; i <= ifs.gcount(); ++i)
-        {
-            printf("0x%02X ", buffer[i - 1]);
-            if (i % 8 == 0)
-                printf("\n");
-        }
-        printf("\n");
-    }
-    ifs.close();
-
+		// read a PageDB from a file
+		auto pages = gstream::read_pages<page_t, std::vector>("wewv_disk_based.pages");
+		// print PageDB
+		printf("\n# PageDB of WEWV\n");
+		for (std::size_t i = 0; i < pages.size(); ++i) {
+			printf("page[%llu]--------------------------------\n", i);
+			gstream::print_page(pages[i]);
+			printf("\n");
+		}
+	}
     return 0;
 }
 
-int test_in_memory()
+int wewv_in_memory()
 {
-    puts("[Weighted Edge Weighted Vertex (WEWV) In-Memory PageDB Geneartion]");
-    rid_table_generator_t rid_gen;
-    printf("Slot Size: %llu\n", builder_t::SlotSize);
-    auto result = rid_gen.generate(edge_list.data(), edge_list.size());
-    if (result.first != gstream::generator_error_t::success)
+	/* begin */
+    puts("@ Weighted Edge Weighted Vertex (WEWV) In-Memory PageDB Geneartion\n");
+	
+	/* section: RID-table generator */
+	{
+		// create a RID-table generator by gstream::generator_traits
+		generator_traits::rid_table_generator rtable_generator;
+		// call the rid_table_generator::generate method with an in-memory edge list
+		auto generate_result = rtable_generator.generate(wewv_edge_list.data(), wewv_edge_list.size());
+		// check the generator returns success
+    	if (generate_result.error != gstream::generator_error_t::success) {
+			puts("Failed to RID Table Generation");
+			return -1;
+		}
+		// save the RID table to file
+		std::ofstream ofs{ "wewv_inmemory.rid_table", std::ios::out | std::ios::binary };
+		gstream::write_rid_table(generate_result.table, ofs);
+		ofs.close();
+	}
+
+	/* section: PageDB generator */
     {
-        puts("Failed to RID Table Generation");
-        return -1;
+	    // read a RID-table from a file for passing to PageDB generator as a constructor argument
+		auto rid_table = gstream::read_rid_table<generator_traits::rid_tuple_t, std::vector>("wewv_inmemory.rid_table");	
+		// create a PageDB generator by gstream::generator_traits with rid_table
+		generator_traits::pagedb_generator pagedb_generator{ rid_table };
+		// call the pagedb_generator::generate method with an in-memory edge list and output stream
+		// * Note: the PageDB generator generates a PageDB and writes it to an output stream immediately
+		std::ofstream ofs{ "wewv_inmemory.pages", std::ios::out | std::ios::binary };
+		pagedb_generator.generate(wewv_edge_list.data(), wewv_edge_list.size(), wewv_vertex_list.data(), wewv_vertex_list.size(), 0, ofs);
+		ofs.close();
     }
 
-    std::ofstream rid_out{ "wewv_inmemory.rid_table", std::ios::out | std::ios::binary };
-    for (auto& tuple : result.second)
+	/* section: print */
     {
-        printf("%u\t|\t%llu\n", tuple.start_vid, tuple.payload);
-        rid_out.write(reinterpret_cast<char*>(&tuple.start_vid), sizeof(tuple.start_vid));
-        rid_out.write(reinterpret_cast<char*>(&tuple.payload), sizeof(tuple.payload));
-    }
-    printf("\n");
-    rid_out.close();
-
-    pagedb_generator_t dbgen{ result.second };
-    std::ofstream ofs{ "wewv_inmemory.pages", std::ios::out | std::ios::binary };
-    dbgen.generate(edge_list.data(), edge_list.size(), vertex_list.data(), vertex_list.size(), 0, ofs);
-    ofs.close();
-
-    std::ifstream ifs{ "wewv_inmemory.pages", std::ios::in | std::ios::binary };
-    char buffer[PageSize] = { 0, };
-
-    uint64_t pid = 0;
-    while (!ifs.eof())
-    {
-        memset(buffer, 0, PageSize);
-        ifs.read(buffer, PageSize);
-        printf("gcount: %llu, PID[%llu]\n", ifs.gcount(), pid++);
-
-        for (int i = 1; i <= ifs.gcount(); ++i)
-        {
-            printf("0x%02X ", buffer[i - 1]);
-            if (i % 8 == 0)
-                printf("\n");
-        }
-        printf("\n");
-    }
-    ifs.close();
-
-    return 0;
+		// read a RID-table from a file
+		auto rid_table = gstream::read_rid_table<generator_traits::rid_tuple_t, std::vector>("wewv_inmemory.rid_table");
+		// print RID-table
+		printf("# RID-table of WEWV\n");
+		gstream::print_rid_table(rid_table);
+    	
+    	// read a PageDB from a file
+    	auto pages = gstream::read_pages<page_t, std::vector>("wewv_inmemory.pages");
+		// print PageDB
+		printf("\n# PageDB of WEWV\n");
+    	for (std::size_t i = 0; i < pages.size(); ++i) {
+			printf("page[%llu]--------------------------------\n", i);
+			gstream::print_page(pages[i]);
+			printf("\n");
+		}
+    }	
+	return 0;
 }
 
 } // !namespace wewv

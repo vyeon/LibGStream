@@ -1,18 +1,18 @@
-#ifndef _LibGStream_SAMPLES_PAGEDB_GENERATOR_TEST_H_
-#define _LibGStream_SAMPLES_PAGEDB_GENERATOR_TEST_H_
+#ifndef _LIBGSTREAM_SAMPLES_PAGEDB_GENERATOR_TEST_H_
+#define _LIBGSTREAM_SAMPLES_PAGEDB_GENERATOR_TEST_H_
 
 namespace wewv {
 
-int test_disk_based();
-int test_in_memory();
+int wewv_disk_based();
+int wewv_in_memory();
 
 } // !namespace wewv
 
 namespace weuv {
 
-int test_disk_based();
-int test_in_memory();
+int weuv_disk_based();
+int weuv_in_memory();
 
 } // !namespace weuv
 
-#endif // !_LibGStream_SAMPLES_PAGEDB_GENERATOR_TEST_H_
+#endif // !_LIBGSTREAM_SAMPLES_PAGEDB_GENERATOR_TEST_H_

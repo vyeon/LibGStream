@@ -12,9 +12,6 @@
     <ClInclude Include="include\gstream\mpl.h">
       <Filter>gstream</Filter>
     </ClInclude>
-    <ClInclude Include="include\gstream\datatype\pagedb_generator.h">
-      <Filter>gstream\datatype</Filter>
-    </ClInclude>
     <ClInclude Include="include\gstream\datatype\slotted_page.h">
       <Filter>gstream\datatype</Filter>
     </ClInclude>
