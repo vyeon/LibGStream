@@ -117,6 +117,10 @@ struct page_traits {
 	using record_size_t = typename page_t::record_size_t;
 	using edge_payload_t = typename page_t::edge_payload_t;
 	using vertex_payload_t = typename page_t::vertex_payload_t;
+    using adj_list_elem_t = typename page_t::adj_list_elem_t;
+    using page_flag_t = typename page_t::page_flag_t;
+    using footer_t = typename page_t::footer_t;
+    using slot_t = typename page_t::slot_t;
 	static constexpr std::size_t PageSize = page_t::PageSize;
 	using vertex_t = vertex_template<vertex_id_t, vertex_payload_t>;
 	using edge_t = edge_template<vertex_id_t, edge_payload_t>;
@@ -687,6 +691,7 @@ struct generator_traits {
 	using page_traits = page_traits<PageTy>;
 	using rid_table_generator = rid_table_generator<PageTy, RIDTuplePayloadTy, RIDContainerTy>;
 	using rid_tuple_t = typename rid_table_generator::rid_tuple_t;
+    using rid_table_t = typename rid_table_generator::rid_table_t;
 	using pagedb_generator = pagedb_generator<typename page_traits::page_builder_t, typename rid_table_generator::rid_table_t>;
 };
 
