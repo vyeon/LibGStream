@@ -120,7 +120,7 @@ page_traits::vertex_t string_to_wewv_vertex(std::string& raw)
     However, following edge_iterator has one parameter named "ifs" for handling input file. 
     We can convert it to a function without arguments by using std::bind or lambda. */
 
-// edge and vertex iterator must return a pair, which is consist of vertex #'s edgeset (edge-list) and maximum VID value
+// edge and vertex iterator must returns a pair, which is consist of vertex #'s edgeset (edge-list) and maximum VID value
 // std::pair< std::vector<edge_t> == vertex #'s edgeset, vertex_id_t == maximum VID >
 std::pair< std::vector<page_traits::edge_t>, vertex_id_t> wewv_edge_iterator(std::ifstream& ifs)
 {
