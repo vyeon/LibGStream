@@ -175,7 +175,7 @@ template <typename PageTy,
 		std::shared_ptr<page_builder_t> page{ std::make_shared<page_builder_t>() };
 };
 
-#define RID_TABLE_GENERATOR_TEMPLATE template <typename PageTy, typename RIDTuplePayloadTy, template <typename _ElemTy,	typename = std::allocator<_ElemTy> > class RIDTupleContTy = std::vector >
+#define RID_TABLE_GENERATOR_TEMPLATE template <typename PageTy, typename RIDTuplePayloadTy, template <typename _ElemTy,	typename > class RIDTupleContTy >
 #define RID_TABLE_GENERATOR rid_table_generator<PageTy, RIDTuplePayloadTy, RIDTupleContTy>
 
 RID_TABLE_GENERATOR_TEMPLATE

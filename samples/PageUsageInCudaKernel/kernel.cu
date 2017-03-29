@@ -24,17 +24,17 @@ using rid_table_t = generator_traits::rid_table_t;
 
 int main()
 {
-    rid_table_t rtable = gstream::read_rid_table<rid_tuple_t, std::vector>("wewv.rid_table");
-    printf("# RID Table\n");
+	rid_table_t rtable = gstream::read_rid_table<rid_tuple_t, std::vector>("wewv.rid_table");
+	printf("# RID Table\n");
 	gstream::print_rid_table(rtable);
 
-    page_cont_t pages = gstream::read_pages<page_t, std::vector>("wewv.pages");
-    printf("\n# Pages\n");
-    for (size_t i = 0; i < pages.size(); ++i) {
-        printf("page[%llu]--------------------------------\n", i);
+	page_cont_t pages = gstream::read_pages<page_t, std::vector>("wewv.pages");
+	printf("\n# Pages\n");
+	for (size_t i = 0; i < pages.size(); ++i) {
+		printf("page[%llu]--------------------------------\n", i);
 		gstream::print_page(pages[i]);
 		printf("\n");
-    }
+	}
 
-    return 0;
+	return 0;
 }

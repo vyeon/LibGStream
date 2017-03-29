@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PageDatabaseGenerator", "Pa
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PageDatabaseReader", "PageDatabaseReader\PageDatabaseReader.vcxproj", "{0BC1E29F-667A-4381-8542-2A1777633B5D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PageUsageInCudaKernel", "PageUsageInCudaKernel\PageUsageInCudaKernel.vcxproj", "{74E513E1-6BA6-4F5D-83CB-9A968B5813D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,10 @@ Global
 		{0BC1E29F-667A-4381-8542-2A1777633B5D}.Debug|x64.Build.0 = Debug|x64
 		{0BC1E29F-667A-4381-8542-2A1777633B5D}.Release|x64.ActiveCfg = Release|x64
 		{0BC1E29F-667A-4381-8542-2A1777633B5D}.Release|x64.Build.0 = Release|x64
+		{74E513E1-6BA6-4F5D-83CB-9A968B5813D9}.Debug|x64.ActiveCfg = Debug|x64
+		{74E513E1-6BA6-4F5D-83CB-9A968B5813D9}.Debug|x64.Build.0 = Debug|x64
+		{74E513E1-6BA6-4F5D-83CB-9A968B5813D9}.Release|x64.ActiveCfg = Release|x64
+		{74E513E1-6BA6-4F5D-83CB-9A968B5813D9}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -390,10 +390,12 @@ public:
     /// Scan for extended page
     std::pair<bool/* (1) */, ___size_t /* (2) */> scan_ext() const;
 
+#if 0 // for CUDA(nvcc) compatiblity
     /// Add slot: Add a new slot into a page, returns an offset of new slot
     // Enabled if vertex_payload_t is void type.
     template <typename PayloadTy = vertex_payload_t>
-    typename std::enable_if<std::is_void<PayloadTy>::value, offset_t>::type add_slot(vertex_id_t vertex_id);
+	typename std::enable_if<std::is_void<PayloadTy>::value, offset_t>::type add_slot(vertex_id_t vertex_id);
+
     // Enabled if vertex_payload_t is non-void type.
     template <typename PayloadTy = vertex_payload_t>
     offset_t add_slot(vertex_id_t vertex_id, typename std::enable_if<!std::is_void<PayloadTy>::value, vertex_payload_t>::type payload);
@@ -405,6 +407,57 @@ public:
     // Enabled if vertex_payload_t is non-void type.
     template <typename PayloadTy = vertex_payload_t>
     offset_t add_slot_ext(vertex_id_t vertex_id, typename std::enable_if<!std::is_void<PayloadTy>::value, vertex_payload_t>::type payload);
+#endif 
+
+	/// Add slot: Add a new slot into a page, returns an offset of new slot
+	// Enabled if vertex_payload_t is void type.
+	template <typename PayloadTy = vertex_payload_t>
+	typename std::enable_if<std::is_void<PayloadTy>::value, offset_t>::type add_slot(vertex_id_t vertex_id)
+	{
+		this->footer.rear -= sizeof(slot_t);
+		slot_t& slot = reinterpret_cast<slot_t&>(this->data_section[this->footer.rear]);
+		slot.record_offset = static_cast<record_offset_t>(this->footer.front);
+		slot.vertex_id = vertex_id;
+		this->footer.front += sizeof(record_size_t);
+		return this->number_of_slots() - 1;
+	}
+
+	// Enabled if vertex_payload_t is non-void type.
+	template <typename PayloadTy = vertex_payload_t>
+	offset_t add_slot(vertex_id_t vertex_id, typename std::enable_if<!std::is_void<PayloadTy>::value, vertex_payload_t>::type payload)
+	{
+		this->footer.rear -= sizeof(slot_t);
+		slot_t& slot = reinterpret_cast<slot_t&>(this->data_section[this->footer.rear]);
+		slot.vertex_id = vertex_id;
+		slot.record_offset = static_cast<record_offset_t>(this->footer.front);
+		slot.vertex_payload_t = payload;
+		this->footer.front += sizeof(record_size_t);
+		return this->number_of_slots() - 1;
+	}
+
+	/// Add slot for an extened page
+	// Enabled if vertex_payload_t is void type.
+	template <typename PayloadTy = vertex_payload_t>
+	typename std::enable_if<std::is_void<PayloadTy>::value, offset_t>::type add_slot_ext(vertex_id_t vertex_id)
+	{
+		this->footer.rear -= sizeof(slot_t);
+		slot_t& slot = reinterpret_cast<slot_t&>(this->data_section[this->footer.rear]);
+		slot.vertex_id = vertex_id;
+		slot.record_offset = static_cast<record_offset_t>(this->footer.front);
+		return this->number_of_slots() - 1;
+	}
+
+	// Enabled if vertex_payload_t is non-void type.
+	template <typename PayloadTy = vertex_payload_t>
+	offset_t add_slot_ext(vertex_id_t vertex_id, typename std::enable_if<!std::is_void<PayloadTy>::value, vertex_payload_t>::type payload)
+	{
+		this->footer.rear -= sizeof(slot_t);
+		slot_t& slot = reinterpret_cast<slot_t&>(this->data_section[this->footer.rear]);
+		slot.vertex_id = vertex_id;
+		slot.record_offset = static_cast<record_offset_t>(this->footer.front);
+		slot.vertex_payload_t = payload;
+		return this->number_of_slots() - 1;
+	}
 
     /// Add dummy slot
     offset_t add_dummy_slot();
@@ -468,9 +521,10 @@ std::pair<bool/* (1) */, typename SLOTTED_PAGE_BUILDER::___size_t /* (2) */> SLO
     return std::make_pair(true, static_cast<___size_t>(free_space / sizeof(adj_list_elem_t)));
 }
 
+#if 0 // for CUDA(nvcc) compatibility
 SLOTTED_PAGE_TEMPLATE
 template <typename PayloadTy>
-typename std::enable_if<std::is_void<PayloadTy>::value, __offset_t>::type SLOTTED_PAGE_BUILDER::add_slot(vertex_id_t vertex_id)
+typename std::enable_if<std::is_void<PayloadTy>::value, typename SLOTTED_PAGE_BUILDER::offset_t>::type SLOTTED_PAGE_BUILDER::add_slot(vertex_id_t vertex_id)
 {
     this->footer.rear -= sizeof(slot_t);
     slot_t& slot = reinterpret_cast<slot_t&>(this->data_section[this->footer.rear]);
@@ -495,7 +549,7 @@ typename SLOTTED_PAGE_BUILDER::offset_t SLOTTED_PAGE_BUILDER::add_slot(vertex_id
 
 SLOTTED_PAGE_TEMPLATE
 template <typename PayloadTy>
-typename std::enable_if<std::is_void<PayloadTy>::value, __offset_t>::type SLOTTED_PAGE_BUILDER::add_slot_ext(vertex_id_t vertex_id)
+typename std::enable_if<std::is_void<PayloadTy>::value, SLOTTED_PAGE_BUILDER::offset_t>::type SLOTTED_PAGE_BUILDER::add_slot_ext(vertex_id_t vertex_id)
 {
     this->footer.rear -= sizeof(slot_t);
     slot_t& slot = reinterpret_cast<slot_t&>(this->data_section[this->footer.rear]);
@@ -515,6 +569,7 @@ typename SLOTTED_PAGE_BUILDER::offset_t SLOTTED_PAGE_BUILDER::add_slot_ext(verte
     slot.vertex_payload_t = payload;
     return this->number_of_slots() - 1;
 }
+#endif
 
 SLOTTED_PAGE_TEMPLATE
 typename SLOTTED_PAGE_BUILDER::offset_t SLOTTED_PAGE_BUILDER::add_dummy_slot()
