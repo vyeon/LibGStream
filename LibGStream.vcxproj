@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\gstream\cuda\datatype\device_slotted_page.h" />
     <ClInclude Include="include\gstream\datatype\pagedb.h" />
     <ClInclude Include="include\gstream\datatype\slotted_page.h" />
     <ClInclude Include="include\gstream\mpl.h" />
@@ -49,13 +50,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)\lib64\</OutDir>
-    <IncludePath>$(SolutionDir)\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\include;$(CUDA_PATH)\include;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)\obj\x64\Debug\$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName)-vc140-sgd</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)\lib64\</OutDir>
-    <IncludePath>$(SolutionDir)\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\include;$(CUDA_PATH)\include;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)\obj\x64\Release\$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName)-vc140-s</TargetName>
   </PropertyGroup>

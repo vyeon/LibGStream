@@ -7,6 +7,12 @@
     <Filter Include="gstream\datatype">
       <UniqueIdentifier>{0b100fd1-dff7-4bdc-9fdd-1339793ce002}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gstream\cuda">
+      <UniqueIdentifier>{ebf3962c-212e-4d0c-a1c7-11e775098935}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gstream\cuda\datatype">
+      <UniqueIdentifier>{a1dd7075-705d-4ee5-a0b9-731118c514ab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gstream\mpl.h">
@@ -17,6 +23,9 @@
     </ClInclude>
     <ClInclude Include="include\gstream\datatype\pagedb.h">
       <Filter>gstream\datatype</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gstream\cuda\datatype\device_slotted_page.h">
+      <Filter>gstream\cuda\datatype</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

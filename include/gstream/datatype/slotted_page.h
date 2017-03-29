@@ -1,5 +1,5 @@
-﻿#ifndef _GSTREAM_DATATYPE_SLOTTED_PAGE_H_
-#define _GSTREAM_DATATYPE_SLOTTED_PAGE_H_
+﻿#ifndef _GSTREAM_DATATYPE___GSTREAM_SLOTTED_PAGE_H_
+#define _GSTREAM_DATATYPE___GSTREAM_SLOTTED_PAGE_H_
 #include <cstring>
 #include <cstdint>
 #include <type_traits>
@@ -80,7 +80,7 @@ constexpr size_t SIZE_1KB = 1024u;
 constexpr size_t SIZE_1MB = SIZE_1KB * 1024u;
 constexpr size_t SIZE_1GB = SIZE_1MB * 1024u;
 
-#define SLOTTED_PAGE_TEMPLATE \
+#define __GSTREAM_SLOTTED_PAGE_TEMPLATE \
 template <\
     typename __vertex_id_t,\
     typename __page_id_t,\
@@ -93,7 +93,7 @@ template <\
     typename __offset_t\
 >
 
-#define SLOTTED_PAGE_TEMPLATE_ARGS \
+#define __GSTREAM_SLOTTED_PAGE_TEMPLATE_ARGS \
     __vertex_id_t,\
     __page_id_t,\
     __record_offset_t,\
@@ -112,6 +112,8 @@ constexpr uint32_t LP_EXTENDED = _BASE << 2;
 } // !namespace slotted_page_flag
 
 namespace _slotted_page {
+
+using default_offset_t = uint32_t;
 
 #pragma pack (push, 1)
 
@@ -165,7 +167,7 @@ struct footer {
 
 } // !namespace _slotted_page
 
-#define SLOTTED_PAGE_TEMPLATE_TYPEDEFS \
+#define __GSTREAM_SLOTTED_PAGE_TEMPLATE_TYPEDEFS \
     using vertex_id_t = __vertex_id_t;\
     using page_id_t = __page_id_t;\
     using record_offset_t = __record_offset_t;\
@@ -195,7 +197,7 @@ struct footer {
     using footer_t = typename PAGE_T::footer_t;\
     using ___size_t = typename PAGE_T::___size_t
 
-#define SLOTTED_PAGE_TEMPLATE_CONSTDEFS \
+#define __GSTREAM_SLOTTED_PAGE_TEMPLATE_CONSTDEFS \
     static constexpr ___size_t PageSize = __page_size;\
     static constexpr ___size_t EdgePayloadSize = mpl::_sizeof<edge_payload_t>::value;\
     static constexpr ___size_t VertexPayloadSize = mpl::_sizeof<vertex_payload_t>::value;\
@@ -223,7 +225,7 @@ template <
     size_t   __page_size,
     typename __edge_payload_t = void,
     typename __vertex_payload_t = void,
-    typename __offset_t = uint32_t
+    typename __offset_t = _slotted_page::default_offset_t
 >
 class slotted_page {
     /* Constratint 1. The edge-payload type must be a void type or a Plain old data (POD) type */
@@ -235,12 +237,12 @@ class slotted_page {
 
     /* Typedefs and Constant value definitions */
 public:
-    using type = slotted_page<SLOTTED_PAGE_TEMPLATE_ARGS>;
+    using type = slotted_page<__GSTREAM_SLOTTED_PAGE_TEMPLATE_ARGS>;
     using shared_ptr = std::shared_ptr<type>;
     using unique_ptr = std::unique_ptr<type>;
     using weak_ptr = std::weak_ptr<type>;
-    SLOTTED_PAGE_TEMPLATE_TYPEDEFS;
-    SLOTTED_PAGE_TEMPLATE_CONSTDEFS;
+    __GSTREAM_SLOTTED_PAGE_TEMPLATE_TYPEDEFS;
+    __GSTREAM_SLOTTED_PAGE_TEMPLATE_CONSTDEFS;
 
     /* Member functions */
         // Constructors & Destructor
@@ -330,14 +332,14 @@ public:
     footer_t footer{ 0, 0, 0, DataSectionSize };
 };
 
-#define SLOTTED_PAGE slotted_page<SLOTTED_PAGE_TEMPLATE_ARGS>
+#define __GSTREAM_SLOTTED_PAGE slotted_page<__GSTREAM_SLOTTED_PAGE_TEMPLATE_ARGS>
 
-SLOTTED_PAGE_TEMPLATE SLOTTED_PAGE::slotted_page(const type& other)
+__GSTREAM_SLOTTED_PAGE_TEMPLATE __GSTREAM_SLOTTED_PAGE::slotted_page(const type& other)
 {
     memmove(this, &other, PageSize);
 }
 
-SLOTTED_PAGE_TEMPLATE SLOTTED_PAGE::slotted_page(page_flag_t flags)
+__GSTREAM_SLOTTED_PAGE_TEMPLATE __GSTREAM_SLOTTED_PAGE::slotted_page(page_flag_t flags)
 {
     footer.flags = flags;
 }
@@ -354,17 +356,17 @@ template <
     size_t   __page_size,
     typename __edge_payload_t = void,
     typename __vertex_payload_t = void,
-    typename __offset_t = uint32_t 
+    typename __offset_t = _slotted_page::default_offset_t
 >
-class slotted_page_builder: public slotted_page<SLOTTED_PAGE_TEMPLATE_ARGS> {
+class slotted_page_builder: public slotted_page<__GSTREAM_SLOTTED_PAGE_TEMPLATE_ARGS> {
 public:
-    using page_t = slotted_page<SLOTTED_PAGE_TEMPLATE_ARGS>;
-    using type = slotted_page_builder<SLOTTED_PAGE_TEMPLATE_ARGS>;
+    using page_t = slotted_page<__GSTREAM_SLOTTED_PAGE_TEMPLATE_ARGS>;
+    using type = slotted_page_builder<__GSTREAM_SLOTTED_PAGE_TEMPLATE_ARGS>;
     using shared_ptr = std::shared_ptr<type>;
     using unique_ptr = std::unique_ptr<type>;
     using weak_ptr = std::weak_ptr<type>;
-    SLOTTED_PAGE_TEMPLATE_TYPEDEFS;
-    SLOTTED_PAGE_TEMPLATE_CONSTDEFS;
+    __GSTREAM_SLOTTED_PAGE_TEMPLATE_TYPEDEFS;
+    __GSTREAM_SLOTTED_PAGE_TEMPLATE_CONSTDEFS;
 
     // Constructors & Destructor
     slotted_page_builder() = default;
@@ -480,29 +482,29 @@ public:
     void clear();
 };
 
-#define SLOTTED_PAGE_BUILDER slotted_page_builder<SLOTTED_PAGE_TEMPLATE_ARGS>
+#define __GSTREAM_SLOTTED_PAGE_BUILDER slotted_page_builder<__GSTREAM_SLOTTED_PAGE_TEMPLATE_ARGS>
 
-SLOTTED_PAGE_TEMPLATE
-SLOTTED_PAGE_BUILDER::slotted_page_builder(const type& other)
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
+__GSTREAM_SLOTTED_PAGE_BUILDER::slotted_page_builder(const type& other)
 {
     memmove(this, &other, PageSize);
 }
 
-SLOTTED_PAGE_TEMPLATE
-SLOTTED_PAGE_BUILDER::slotted_page_builder(page_flag_t flags)
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
+__GSTREAM_SLOTTED_PAGE_BUILDER::slotted_page_builder(page_flag_t flags)
 {
     this->footer.flags = flags;
 }
 
-SLOTTED_PAGE_TEMPLATE
-inline typename SLOTTED_PAGE_BUILDER::type& SLOTTED_PAGE_BUILDER::operator=(const type& other)
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
+inline typename __GSTREAM_SLOTTED_PAGE_BUILDER::type& __GSTREAM_SLOTTED_PAGE_BUILDER::operator=(const type& other)
 {
     memmove(this, &other, PageSize);
     return *this;
 }
 
-SLOTTED_PAGE_TEMPLATE
-std::pair<bool/* (1) */, typename SLOTTED_PAGE_BUILDER::___size_t /* (2) */> SLOTTED_PAGE_BUILDER::scan() const
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
+std::pair<bool/* (1) */, typename __GSTREAM_SLOTTED_PAGE_BUILDER::___size_t /* (2) */> __GSTREAM_SLOTTED_PAGE_BUILDER::scan() const
 {
     auto free_space = this->footer.rear - this->footer.front;
     if (free_space < (sizeof(slot_t) + sizeof(record_size_t)))
@@ -511,8 +513,8 @@ std::pair<bool/* (1) */, typename SLOTTED_PAGE_BUILDER::___size_t /* (2) */> SLO
     return std::make_pair(true, static_cast<___size_t>(free_space / sizeof(adj_list_elem_t)));
 }
 
-SLOTTED_PAGE_TEMPLATE
-std::pair<bool/* (1) */, typename SLOTTED_PAGE_BUILDER::___size_t /* (2) */> SLOTTED_PAGE_BUILDER::scan_ext() const
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
+std::pair<bool/* (1) */, typename __GSTREAM_SLOTTED_PAGE_BUILDER::___size_t /* (2) */> __GSTREAM_SLOTTED_PAGE_BUILDER::scan_ext() const
 {
     auto free_space = this->footer.rear - this->footer.front;
     if (free_space < sizeof(slot_t)) //! Extended page does not need to space to store adjacency list size.
@@ -522,9 +524,9 @@ std::pair<bool/* (1) */, typename SLOTTED_PAGE_BUILDER::___size_t /* (2) */> SLO
 }
 
 #if 0 // for CUDA(nvcc) compatibility
-SLOTTED_PAGE_TEMPLATE
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
 template <typename PayloadTy>
-typename std::enable_if<std::is_void<PayloadTy>::value, typename SLOTTED_PAGE_BUILDER::offset_t>::type SLOTTED_PAGE_BUILDER::add_slot(vertex_id_t vertex_id)
+typename std::enable_if<std::is_void<PayloadTy>::value, typename __GSTREAM_SLOTTED_PAGE_BUILDER::offset_t>::type __GSTREAM_SLOTTED_PAGE_BUILDER::add_slot(vertex_id_t vertex_id)
 {
     this->footer.rear -= sizeof(slot_t);
     slot_t& slot = reinterpret_cast<slot_t&>(this->data_section[this->footer.rear]);
@@ -534,9 +536,9 @@ typename std::enable_if<std::is_void<PayloadTy>::value, typename SLOTTED_PAGE_BU
     return this->number_of_slots() - 1;
 }
 
-SLOTTED_PAGE_TEMPLATE
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
 template <typename PayloadTy>
-typename SLOTTED_PAGE_BUILDER::offset_t SLOTTED_PAGE_BUILDER::add_slot(vertex_id_t vertex_id, typename std::enable_if<!std::is_void<PayloadTy>::value, vertex_payload_t>::type payload)
+typename __GSTREAM_SLOTTED_PAGE_BUILDER::offset_t __GSTREAM_SLOTTED_PAGE_BUILDER::add_slot(vertex_id_t vertex_id, typename std::enable_if<!std::is_void<PayloadTy>::value, vertex_payload_t>::type payload)
 {
     this->footer.rear -= sizeof(slot_t);
     slot_t& slot = reinterpret_cast<slot_t&>(this->data_section[this->footer.rear]);
@@ -547,9 +549,9 @@ typename SLOTTED_PAGE_BUILDER::offset_t SLOTTED_PAGE_BUILDER::add_slot(vertex_id
     return this->number_of_slots() - 1;
 }
 
-SLOTTED_PAGE_TEMPLATE
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
 template <typename PayloadTy>
-typename std::enable_if<std::is_void<PayloadTy>::value, SLOTTED_PAGE_BUILDER::offset_t>::type SLOTTED_PAGE_BUILDER::add_slot_ext(vertex_id_t vertex_id)
+typename std::enable_if<std::is_void<PayloadTy>::value, __GSTREAM_SLOTTED_PAGE_BUILDER::offset_t>::type __GSTREAM_SLOTTED_PAGE_BUILDER::add_slot_ext(vertex_id_t vertex_id)
 {
     this->footer.rear -= sizeof(slot_t);
     slot_t& slot = reinterpret_cast<slot_t&>(this->data_section[this->footer.rear]);
@@ -558,9 +560,9 @@ typename std::enable_if<std::is_void<PayloadTy>::value, SLOTTED_PAGE_BUILDER::of
     return this->number_of_slots() - 1;
 }
 
-SLOTTED_PAGE_TEMPLATE
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
 template <typename PayloadTy>
-typename SLOTTED_PAGE_BUILDER::offset_t SLOTTED_PAGE_BUILDER::add_slot_ext(vertex_id_t vertex_id, typename std::enable_if<!std::is_void<PayloadTy>::value, vertex_payload_t>::type payload)
+typename __GSTREAM_SLOTTED_PAGE_BUILDER::offset_t __GSTREAM_SLOTTED_PAGE_BUILDER::add_slot_ext(vertex_id_t vertex_id, typename std::enable_if<!std::is_void<PayloadTy>::value, vertex_payload_t>::type payload)
 {
     this->footer.rear -= sizeof(slot_t);
     slot_t& slot = reinterpret_cast<slot_t&>(this->data_section[this->footer.rear]);
@@ -571,23 +573,23 @@ typename SLOTTED_PAGE_BUILDER::offset_t SLOTTED_PAGE_BUILDER::add_slot_ext(verte
 }
 #endif
 
-SLOTTED_PAGE_TEMPLATE
-typename SLOTTED_PAGE_BUILDER::offset_t SLOTTED_PAGE_BUILDER::add_dummy_slot()
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
+typename __GSTREAM_SLOTTED_PAGE_BUILDER::offset_t __GSTREAM_SLOTTED_PAGE_BUILDER::add_dummy_slot()
 {
     this->footer.rear -= sizeof(slot_t);
     this->footer.front += sizeof(record_size_t);
     return this->number_of_slots() - 1;
 }
 
-SLOTTED_PAGE_TEMPLATE
-typename SLOTTED_PAGE_BUILDER::offset_t SLOTTED_PAGE_BUILDER::add_dummy_slot_ext()
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
+typename __GSTREAM_SLOTTED_PAGE_BUILDER::offset_t __GSTREAM_SLOTTED_PAGE_BUILDER::add_dummy_slot_ext()
 {
     this->footer.rear -= sizeof(slot_t);
     return this->number_of_slots() - 1;
 }
 
-SLOTTED_PAGE_TEMPLATE
-void SLOTTED_PAGE_BUILDER::add_list_sp(const offset_t slot_offset, adj_list_elem_t* elem_arr, ___size_t record_size)
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
+void __GSTREAM_SLOTTED_PAGE_BUILDER::add_list_sp(const offset_t slot_offset, adj_list_elem_t* elem_arr, ___size_t record_size)
 {
     slot_t& slot = this->slot(slot_offset);
     this->record_size(slot) = static_cast<record_size_t>(record_size);
@@ -595,8 +597,8 @@ void SLOTTED_PAGE_BUILDER::add_list_sp(const offset_t slot_offset, adj_list_elem
     this->footer.front += static_cast<decltype(this->footer.front)>(sizeof(adj_list_elem_t) * record_size);
 }
 
-SLOTTED_PAGE_TEMPLATE
-void SLOTTED_PAGE_BUILDER::add_list_lp_head(___size_t record_size, adj_list_elem_t* elem_arr, ___size_t num_elems_in_page)
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
+void __GSTREAM_SLOTTED_PAGE_BUILDER::add_list_lp_head(___size_t record_size, adj_list_elem_t* elem_arr, ___size_t num_elems_in_page)
 {
     slot_t& slot = this->slot(0);
     this->record_size(slot) = static_cast<record_size_t>(record_size);
@@ -604,50 +606,50 @@ void SLOTTED_PAGE_BUILDER::add_list_lp_head(___size_t record_size, adj_list_elem
     this->footer.front += static_cast<decltype(this->footer.front)>(sizeof(adj_list_elem_t) * num_elems_in_page);
 }
 
-SLOTTED_PAGE_TEMPLATE
-void SLOTTED_PAGE_BUILDER::add_list_lp_ext(adj_list_elem_t* elem_arr, ___size_t num_elems_in_page)
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
+void __GSTREAM_SLOTTED_PAGE_BUILDER::add_list_lp_ext(adj_list_elem_t* elem_arr, ___size_t num_elems_in_page)
 {
     slot_t& slot = this->slot(0);
     memmove(this->list_ext(slot), elem_arr, sizeof(adj_list_elem_t) * num_elems_in_page);
     this->footer.front += static_cast<decltype(this->footer.front)>(sizeof(adj_list_elem_t) * num_elems_in_page);
 }
 
-SLOTTED_PAGE_TEMPLATE
-void SLOTTED_PAGE_BUILDER::add_dummy_list_sp(const offset_t slot_offset, ___size_t record_size)
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
+void __GSTREAM_SLOTTED_PAGE_BUILDER::add_dummy_list_sp(const offset_t slot_offset, ___size_t record_size)
 {
     slot_t& slot = this->slot(slot_offset);
     this->record_size(slot.record_offset) = static_cast<record_size_t>(record_size);
     this->footer.front += static_cast<offset_t>(sizeof(adj_list_elem_t) * record_size);
 }
 
-SLOTTED_PAGE_TEMPLATE
-void SLOTTED_PAGE_BUILDER::add_dummy_list_lp_head(___size_t record_size, ___size_t num_elems_in_page)
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
+void __GSTREAM_SLOTTED_PAGE_BUILDER::add_dummy_list_lp_head(___size_t record_size, ___size_t num_elems_in_page)
 {
     slot_t& slot = this->slot(0);
     this->record_size(slot.record_offset) = record_size;
     this->footer.front += sizeof(adj_list_elem_t) * num_elems_in_page;
 }
 
-SLOTTED_PAGE_TEMPLATE
-void SLOTTED_PAGE_BUILDER::add_dummy_list_lp_ext(___size_t num_elems_in_page)
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
+void __GSTREAM_SLOTTED_PAGE_BUILDER::add_dummy_list_lp_ext(___size_t num_elems_in_page)
 {
     this->footer.front += sizeof(adj_list_elem_t) * num_elems_in_page;
 }
 
-SLOTTED_PAGE_TEMPLATE
-void SLOTTED_PAGE_BUILDER::clear()
+__GSTREAM_SLOTTED_PAGE_TEMPLATE
+void __GSTREAM_SLOTTED_PAGE_BUILDER::clear()
 {
     memset(this->data_section, 0, DataSectionSize);
     this->footer.front = 0;
     this->footer.rear = DataSectionSize;
 }
 
-#undef SLOTTED_PAGE_TEMPLATE_TYPEDEFS
-#undef SLOTTED_PAGE_TEMPLATE_CONSTDEFS
-#undef SLOTTED_PAGE_BUILDER
-#undef SLOTTED_PAGE
-#undef SLOTTED_PAGE_TEMPLATE_ARGS
-#undef SLOTTED_PAGE_TEMPLATE
+//#undef __GSTREAM_SLOTTED_PAGE_TEMPLATE_TYPEDEFS
+//#undef __GSTREAM_SLOTTED_PAGE_TEMPLATE_CONSTDEFS
+#undef __GSTREAM_SLOTTED_PAGE_BUILDER
+#undef __GSTREAM_SLOTTED_PAGE
+//#undef __GSTREAM_SLOTTED_PAGE_TEMPLATE_ARGS
+//#undef __GSTREAM_SLOTTED_PAGE_TEMPLATE
 
 template <typename __builder_t, typename __rid_table_t>
 typename __builder_t::page_id_t vid_to_pid(typename __builder_t::vertex_id_t vid, __rid_table_t& table)
@@ -743,4 +745,4 @@ struct vertex_template<__vertex_id_t, void>
 
 } // !namespace gstream
 
-#endif // !_GSTREAM_DATATYPE_SLOTTED_PAGE_H_
+#endif // !_GSTREAM_DATATYPE___GSTREAM_SLOTTED_PAGE_H_

@@ -1,16 +1,17 @@
+/** -------------------------------------------------------------------
+*	@project	LibGStream
+*	@location	gstream/datatype
+*	@file		pagedb.h
+*	@brief		Template based generic PageDB generator implementation
+*	@author		Seyeon Oh (vee@dgist.ac.kr)
+*	@version	1.1, 28/3/2017
+* ----------------------------------------------------------------- */
+
 #ifndef _GSTREAM_DATATYPE_PAGEDB_H_
 #define _GSTREAM_DATATYPE_PAGEDB_H_
 
-/* ---------------------------------------------------------------
-**
-** LibGStream - Library of GStream by InfoLab @ DGIST (https://infolab.dgist.ac.kr/)
-**
-** pagedb.h
-**
-** Author: Seyeon Oh (vee@dgist.ac.kr)
-** ------------------------------------------------------------ */
-
 #include <gstream/datatype/slotted_page.h>
+#include <cstdio>
 #include <vector>
 #include <fstream>
 #include <iterator>
@@ -18,13 +19,13 @@
 namespace gstream {
 
 #pragma pack(push, 1)
-template <typename __vertex_id_t, typename __payload_t = std::size_t>
+template <typename __vertex_id_t, typename __auxiliary_t = std::size_t>
 struct rid_tuple_template
 {
-    using payload_t = __payload_t;
+    using auxiliary_t = __auxiliary_t;
     using vertex_id_t = __vertex_id_t;
     vertex_id_t start_vid;
-    payload_t   payload;
+	auxiliary_t auxiliary;
 };
 #pragma pack(pop)
 
@@ -41,8 +42,7 @@ CONT_T<PAGE_T> read_pages(const char* filepath, const std::size_t bundle_of_page
     std::ifstream ifs{ filepath, std::ios::in | std::ios::binary };
 
     // TODO: metadata implementation
-
-    
+	
     cont_t pages; // container for pages which will be returned.
 
     // Read pages
@@ -110,18 +110,8 @@ template <typename RID_TUPLE_T,
 template <typename PageTy>
 struct page_traits {
 	using page_t = PageTy;
-	using vertex_id_t = typename page_t::vertex_id_t;
-	using page_id_t = typename page_t::page_id_t;
-	using record_offset_t = typename page_t::record_offset_t;
-	using slot_offset_t = typename page_t::slot_offset_t;
-	using record_size_t = typename page_t::record_size_t;
-	using edge_payload_t = typename page_t::edge_payload_t;
-	using vertex_payload_t = typename page_t::vertex_payload_t;
-    using adj_list_elem_t = typename page_t::adj_list_elem_t;
-    using page_flag_t = typename page_t::page_flag_t;
-    using footer_t = typename page_t::footer_t;
-    using slot_t = typename page_t::slot_t;
-	static constexpr std::size_t PageSize = page_t::PageSize;
+	ALIAS_SLOTTED_PAGE_TEMPLATE_TYPEDEFS(page_t);
+	ALIAS_SLOTTED_PAGE_TEMPLATE_CONSTDEFS(page_t);
 	using vertex_t = vertex_template<vertex_id_t, vertex_payload_t>;
 	using edge_t = edge_template<vertex_id_t, edge_payload_t>;
 	using page_builder_t = slotted_page_builder<vertex_id_t, page_id_t, record_offset_t, slot_offset_t, record_size_t, PageSize, edge_payload_t, vertex_payload_t>;
@@ -202,8 +192,7 @@ typename RID_TABLE_GENERATOR::generate_result RID_TABLE_GENERATOR::generate(edge
 	max_vid = eir.second;
 
 	// Iteration
-	do
-	{
+	do {
 		iteration_per_vertex(table, eir.first.size());
 		vid += 1;
 
@@ -211,8 +200,7 @@ typename RID_TABLE_GENERATOR::generate_result RID_TABLE_GENERATOR::generate(edge
 		if (0 == eir.first.size())
 			break; // eof
 
-		if (eir.first[0].src > vid)
-		{
+		if (eir.first[0].src > vid) {
 			for (vertex_id_t id = vid; id < eir.first[0].src; ++id)
 				iteration_per_vertex(table, 0);
 			vid = eir.first[0].src;
@@ -234,8 +222,7 @@ typename RID_TABLE_GENERATOR::generate_result RID_TABLE_GENERATOR::generate(edge
 	___size_t off = 0;
 	vertex_id_t src;
 	vertex_id_t max;
-	auto edge_iterator = [&]() -> edge_iteration_result_t
-	{
+	auto edge_iterator = [&]() -> edge_iteration_result_t {
 		edgeset_t edgeset;
 		if (off == num_total_edges)
 			return std::make_pair(edgeset, 0); // eof
@@ -243,10 +230,8 @@ typename RID_TABLE_GENERATOR::generate_result RID_TABLE_GENERATOR::generate(edge
 		src = sorted_edges[off].src;
 		max = (sorted_edges[off].src > sorted_edges[off].dst) ? sorted_edges[off].src : sorted_edges[off].dst;
 		edgeset.push_back(sorted_edges[off++]);
-		for (___size_t i = off; i < num_total_edges; ++i)
-		{
-			if (sorted_edges[off].src == src)
-			{
+		for (___size_t i = off; i < num_total_edges; ++i) {
+			if (sorted_edges[off].src == src) {
 				if (sorted_edges[off].dst > max)
 					max = sorted_edges[off].dst;
 				edgeset.push_back(sorted_edges[off++]);
@@ -311,7 +296,7 @@ void RID_TABLE_GENERATOR::issue_sp(rid_table_t& table)
 {
 	rid_tuple_t tuple;
 	tuple.start_vid = next_svid;
-	tuple.payload = 0; // small page: 0
+	tuple.auxiliary = 0; // small page: 0
 	table.push_back(tuple);
 	next_svid = vid_counter;
 	page->clear();
@@ -323,7 +308,7 @@ void RID_TABLE_GENERATOR::issue_lp_head(rid_table_t& table, ___size_t num_relate
 {
 	rid_tuple_t tuple;
 	tuple.start_vid = next_svid;
-	tuple.payload = static_cast<typename rid_tuple_t::payload_t>(num_related); // head page: the number of related pages
+	tuple.auxiliary = static_cast<typename rid_tuple_t::payload_t>(num_related); // head page: the number of related pages
 	table.push_back(tuple);
 	// This function does not update a member variable 'last_vid' 
 	page->clear();
@@ -335,9 +320,8 @@ void RID_TABLE_GENERATOR::issue_lp_exts(rid_table_t& table, ___size_t num_ext_pa
 {
 	rid_tuple_t tuple;
 	tuple.start_vid = next_svid;
-	for (___size_t i = 1; i <= num_ext_pages; ++i)
-	{
-		tuple.payload = i; // ext page: page offset from head page
+	for (___size_t i = 1; i <= num_ext_pages; ++i) {
+		tuple.auxiliary = i; // ext page: page offset from head page
 		table.push_back(tuple);
 	}
 	next_svid = vid_counter + 1;
@@ -700,30 +684,30 @@ void write_rid_table(RIDTableTy& rid_table, std::ostream& os)
 {
 	for (auto& tuple : rid_table) {
 		os.write(reinterpret_cast<char*>(&tuple.start_vid), sizeof(tuple.start_vid));
-		os.write(reinterpret_cast<char*>(&tuple.payload), sizeof(tuple.payload));
+		os.write(reinterpret_cast<char*>(&tuple.auxiliary), sizeof(tuple.auxiliary));
 	}
 }
 
 template <typename PageTy>
-void print_page(PageTy& page)
+void print_page(PageTy& page, FILE* out_file = stdout)
 {
-	printf("number of slots in the page: %u\n", page.number_of_slots());
-	printf("page type: %s\n",
+	fprintf(out_file, "number of slots in the page: %u\n", page.number_of_slots());
+	fprintf(out_file, "page type: %s\n",
 		(page.is_sp()) ?
 		"small page" : (page.is_lp_head()) ?
 		"large page (head)" : "large page (extended)");
 	for (int i = 1; i <= PageTy::PageSize; ++i) {
-		printf("0x%02X ", page[i - 1]);
+		printf(out_file, "0x%02X ", page[i - 1]);
 		if (i % 8 == 0)
-			printf("\n");
+			fprintf(out_file, "\n");
 	}
 }
 
 template <typename RIDTableTy>
-void print_rid_table(RIDTableTy& rid_table)
+void print_rid_table(RIDTableTy& rid_table, FILE* out_file = stdout)
 {
 	for (auto& tuple : rid_table)
-		printf("%u\t|\t%llu\n", tuple.start_vid, tuple.payload);
+		fprintf(out_file, "%u\t|\t%llu\n", tuple.start_vid, tuple.auxiliary);
 }
 
 #undef PAGEDB_GENERATOR
