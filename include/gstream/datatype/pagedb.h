@@ -51,26 +51,18 @@ CONT_T<PAGE_T> read_pages(const char* filepath, const std::size_t bundle_of_page
         std::vector<page_t> buffer;
         buffer.resize(bundle_of_pages);
         uint64_t counter = 0;
-        while (true)
-        {
+        while (true) {
             ++counter;
             ifs.read(reinterpret_cast<char*>(buffer.data()), chunk_size);
             std::size_t extracted = ifs.gcount() / sizeof(page_t);
-            if (extracted == bundle_of_pages)
-            {
+            if (extracted == bundle_of_pages) {
                 std::copy(buffer.begin(), buffer.end(), std::back_inserter(pages));
             }
-            else
-            {
+            else {
                 std::copy(buffer.begin(), buffer.begin() + extracted, std::back_inserter(pages));
                 break;
             }
         }
-       /* printf("Finished read %llu pages from file %s. bundle size = %llu, total iteration: %llu\n",
-               pages.size(),
-               filepath,
-               bundle_of_pages,
-               counter);*/
     }
 
     return pages;
@@ -93,15 +85,11 @@ template <typename RID_TUPLE_T,
     // Read table
     {
         rid_tuple_t tuple;
-        while (!ifs.eof())
-        {
+        while (!ifs.eof()) {
             ifs.read(reinterpret_cast<char*>(&tuple), sizeof(rid_tuple_t));
             if (ifs.gcount() > 0)
                 table.push_back(tuple);
         }
-        /*printf("Finished read RID Table from file %s. number of tuples: %llu\n",
-               filepath,
-               table.size());*/
     }
 
     return table;

@@ -37,7 +37,7 @@ class device_slotted_page {
 		"Generic Slotted Page: Constraint 1. The edge-payload type must be a Plain old data (POD) type");
 	/* Constratint 2. The vertex-payload type must be a void type or a Plain old data (POD) type */
 	static_assert((std::is_void<__vertex_payload_t>::value || std::is_pod<__vertex_payload_t>::value),
-		"Generic Slotted Page: Constraint 2. The vertex-payload type must be a Plain old data (POD) type");
+		"Generic Slotted Page: Constraint 2. The vertex-payload type must be a Plain old data (POD) type"); 
 
 	/* Typedefs and Constant value definitions */
 public:
@@ -48,15 +48,15 @@ public:
 	__GSTREAM_SLOTTED_PAGE_TEMPLATE_TYPEDEFS;
 	__GSTREAM_SLOTTED_PAGE_TEMPLATE_CONSTDEFS;
 
-	/* Member functions */
-	// Constructors & Destructor
-	__host__ device_slotted_page() = default;
-	__host__ explicit device_slotted_page(page_flag_t flag);
-	__host__ device_slotted_page(const type& other);
-	__host__ ~device_slotted_page() = default;
+    //! Disallow Constructors & Destructor
+    device_slotted_page() = delete;
+    device_slotted_page(const type& other) = delete;
+    ~device_slotted_page() = delete;
 
+	/* Member functions */ 
+    
 	// Operators
-	inline type& operator=(const type& other)
+	__device__ inline type& operator=(const type& other)
 	{
 		memmove(this, &other, PageSize);
 		return *this;
