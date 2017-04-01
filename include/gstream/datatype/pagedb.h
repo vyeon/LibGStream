@@ -296,7 +296,7 @@ void RID_TABLE_GENERATOR::issue_lp_head(rid_table_t& table, ___size_t num_relate
 {
 	rid_tuple_t tuple;
 	tuple.start_vid = next_svid;
-	tuple.auxiliary = static_cast<typename rid_tuple_t::payload_t>(num_related); // head page: the number of related pages
+	tuple.auxiliary = static_cast<typename rid_tuple_t::auxiliary_t>(num_related); // head page: the number of related pages
 	table.push_back(tuple);
 	// This function does not update a member variable 'last_vid' 
 	page->clear();
@@ -661,10 +661,10 @@ template <typename PageTy, typename RIDTuplePayloadTy = std::size_t, template <t
 struct generator_traits {
 	using page_t = PageTy;
 	using page_traits = page_traits<PageTy>;
-	using rid_table_generator = rid_table_generator<PageTy, RIDTuplePayloadTy, RIDContainerTy>;
-	using rid_tuple_t = typename rid_table_generator::rid_tuple_t;
-    using rid_table_t = typename rid_table_generator::rid_table_t;
-	using pagedb_generator = pagedb_generator<typename page_traits::page_builder_t, typename rid_table_generator::rid_table_t>;
+	using rid_table_generator_t = rid_table_generator<PageTy, RIDTuplePayloadTy, RIDContainerTy>;
+	using rid_tuple_t = typename rid_table_generator_t::rid_tuple_t;
+    using rid_table_t = typename rid_table_generator_t::rid_table_t;
+	using pagedb_generator_t = pagedb_generator<typename page_traits::page_builder_t, typename rid_table_generator_t::rid_table_t>;
 };
 
 template <typename RIDTableTy>
@@ -679,13 +679,13 @@ void write_rid_table(RIDTableTy& rid_table, std::ostream& os)
 template <typename PageTy>
 void print_page(PageTy& page, FILE* out_file = stdout)
 {
-	fprintf(out_file, "number of slots in the page: %u\n", page.number_of_slots());
+	fprintf(out_file, "number of slots in the page: %llu\n", static_cast<std::uint64_t>(page.number_of_slots()));
 	fprintf(out_file, "page type: %s\n",
 		(page.is_sp()) ?
 		"small page" : (page.is_lp_head()) ?
 		"large page (head)" : "large page (extended)");
 	for (int i = 1; i <= PageTy::PageSize; ++i) {
-		printf(out_file, "0x%02X ", page[i - 1]);
+		fprintf(out_file, "0x%02llX ", static_cast<std::uint64_t>(page[i - 1]));
 		if (i % 8 == 0)
 			fprintf(out_file, "\n");
 	}
@@ -695,7 +695,7 @@ template <typename RIDTableTy>
 void print_rid_table(RIDTableTy& rid_table, FILE* out_file = stdout)
 {
 	for (auto& tuple : rid_table)
-		fprintf(out_file, "%u\t|\t%llu\n", tuple.start_vid, tuple.auxiliary);
+		fprintf(out_file, "%llu\t|\t%llu\n", static_cast<std::int64_t>(tuple.start_vid), static_cast<std::uint64_t>(tuple.auxiliary));
 }
 
 #undef PAGEDB_GENERATOR

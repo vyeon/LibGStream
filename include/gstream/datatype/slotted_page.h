@@ -142,7 +142,7 @@ template <
     struct slot {
     __vertex_id_t      vertex_id;
     __record_offset_t  record_offset;
-    __vertex_payload_t vertex_payload_t;
+    __vertex_payload_t vertex_payload;
 };
 
 template <
@@ -432,7 +432,7 @@ public:
 		slot_t& slot = reinterpret_cast<slot_t&>(this->data_section[this->footer.rear]);
 		slot.vertex_id = vertex_id;
 		slot.record_offset = static_cast<record_offset_t>(this->footer.front);
-		slot.vertex_payload_t = payload;
+		slot.vertex_payload = payload;
 		this->footer.front += sizeof(record_size_t);
 		return this->number_of_slots() - 1;
 	}
@@ -457,7 +457,7 @@ public:
 		slot_t& slot = reinterpret_cast<slot_t&>(this->data_section[this->footer.rear]);
 		slot.vertex_id = vertex_id;
 		slot.record_offset = static_cast<record_offset_t>(this->footer.front);
-		slot.vertex_payload_t = payload;
+		slot.vertex_payload = payload;
 		return this->number_of_slots() - 1;
 	}
 

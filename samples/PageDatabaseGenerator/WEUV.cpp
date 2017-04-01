@@ -141,7 +141,7 @@ int weuv_disk_based()
 		std::ifstream edge_ifs{ "weuv_edges.txt" };
 
 		// create a RID-table generator by gstream::generator_traits
-		generator_traits::rid_table_generator rtable_generator;
+		generator_traits::rid_table_generator_t rtable_generator;
 		// call the rid_table_generator::generate method with an edge iterator
 		auto generate_result = rtable_generator.generate(std::bind(weuv_edge_iterator, std::ref(edge_ifs)));
 		// check the generator returns success
@@ -164,7 +164,7 @@ int weuv_disk_based()
 														 // read a RID-table from a file for passing to PageDB generator as a constructor argument
 		auto rid_table = gstream::read_rid_table<generator_traits::rid_tuple_t, std::vector>("weuv_disk_based.rid_table");
 		// create a PageDB generator by gstream::generator_traits with rid_table
-		generator_traits::pagedb_generator pagedb_generator{ rid_table };
+		generator_traits::pagedb_generator_t pagedb_generator{ rid_table };
 		// call the pagedb_generator::generate method with an in-memory edge list and output stream
 		// * Note: the PageDB generator generates a PageDB and writes it to an output stream immediately
 		std::ofstream ofs{ "weuv_disk_based.pages", std::ios::out | std::ios::binary };
@@ -201,7 +201,7 @@ int weuv_in_memory()
 	/* section: RID-table generator */
 	{
 		// create a RID-table generator by gstream::generator_traits
-		generator_traits::rid_table_generator rtable_generator;
+		generator_traits::rid_table_generator_t rtable_generator;
 		// call the rid_table_generator::generate method with an in-memory edge list
 		auto generate_result = rtable_generator.generate(weuv_edge_list.data(), weuv_edge_list.size());
 		// check the generator returns success
@@ -220,7 +220,7 @@ int weuv_in_memory()
 		// read a RID-table from a file for passing to PageDB generator as a constructor argument
 		auto rid_table = gstream::read_rid_table<generator_traits::rid_tuple_t, std::vector>("weuv_inmemory.rid_table");
 		// create a PageDB generator by gstream::generator_traits with rid_table
-		generator_traits::pagedb_generator pagedb_generator{ rid_table };
+		generator_traits::pagedb_generator_t pagedb_generator{ rid_table };
 		// call the pagedb_generator::generate method with an in-memory edge list and output stream
 		// * Note: the PageDB generator generates a PageDB and writes it to an output stream immediately
 		std::ofstream ofs{ "weuv_inmemory.pages", std::ios::out | std::ios::binary };
