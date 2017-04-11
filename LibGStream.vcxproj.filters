@@ -27,5 +27,8 @@
     <ClInclude Include="include\gstream\cuda\datatype\device_slotted_page.h">
       <Filter>gstream\cuda\datatype</Filter>
     </ClInclude>
+    <ClInclude Include="include\gstream\cache.h">
+      <Filter>gstream</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
