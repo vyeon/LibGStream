@@ -12,6 +12,7 @@
 
 #include <utility>
 #include <functional>
+#include <memory>
 
 // Check windows
 #if _WIN32 || _WIN64
@@ -133,6 +134,12 @@ struct _sizeof<void>
         value = 0
     };
 };
+
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args)
+{
+	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
 
 } // !namespace mpl
 
