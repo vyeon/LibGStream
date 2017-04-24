@@ -5,32 +5,26 @@
 
 namespace gstream {
 
-template <typename KeyTy>
-class polymorphic_cache_policy_interface {
+using page_cache_key = uint64_t;
+
+class page_cache_policy {
 public:
-	using key_type = KeyTy;
-	using type = polymorphic_cache_policy_interface<KeyTy>;
-	using shared_ptr = std::shared_ptr<type>;
-	using unique_ptr = std::unique_ptr<type>;
-	using weak_ptr = std::weak_ptr<type>;
-	virtual ~polymorphic_cache_policy_interface() noexcept = default;
+	using key_type = page_cache_key;
+	using shared_ptr = std::shared_ptr<page_cache_policy>;
+	using unique_ptr = std::unique_ptr<page_cache_policy>;
+	using weak_ptr = std::weak_ptr<page_cache_policy>;
+	virtual ~page_cache_policy() noexcept = default;
 	virtual bool hit(key_type key) noexcept = 0;
 	virtual bool push(key_type key) noexcept = 0;
 	virtual bool pop(key_type& out) noexcept = 0;
 };
 
-namespace page_cache {
-
-using key_type = void*;
-using cache_policy_type = polymorphic_cache_policy_interface<key_type>;
-
-template <typename CacheReplacementPolicy>
-cache_policy_type::unique_ptr page_cache_policy_allocator(std::size_t capacity, key_type hint) {
-	static_assert(std::is_base_of<cache_policy_type, CacheReplacementPolicy>::value, "Invalid Page Cache Replacement Policy.");
-	return mpl::make_unique<CacheReplacementPolicy>(capacity);
+template <typename Policy>
+page_cache_policy::unique_ptr generate_page_cache_policy(page_cache_key pid_min, page_cache_key pid_max) {
+	return std::make_unique<Policy>(pid_min, pid_max);
 }
 
-} // !namespace page_cache
+using page_cache_policy_generator = std::function<page_cache_policy::unique_ptr (page_cache_key /*pid_min*/, page_cache_key /*pid_max*/)>;
 
 } // !namespace gstream
 

@@ -30,5 +30,8 @@
     <ClInclude Include="include\gstream\cache.h">
       <Filter>gstream</Filter>
     </ClInclude>
+    <ClInclude Include="include\gstream\graph_query.h">
+      <Filter>gstream</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
