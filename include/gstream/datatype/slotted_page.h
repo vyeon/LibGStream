@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <memory>
 #include <gstream/mpl.h>
+#include <gstream/constdefs.h>
 
 /* ---------------------------------------------------------------
 **
@@ -76,10 +77,6 @@
 
 namespace gstream {
 
-constexpr size_t SIZE_1KB = 1024u;
-constexpr size_t SIZE_1MB = SIZE_1KB * 1024u;
-constexpr size_t SIZE_1GB = SIZE_1MB * 1024u;
-
 #define __GSTREAM_SLOTTED_PAGE_TEMPLATE \
 template <\
     typename __vertex_id_t,\
@@ -87,7 +84,7 @@ template <\
     typename __record_offset_t,\
     typename __slot_offset_t,\
     typename __record_size_t,\
-    size_t   __page_size,\
+    std::size_t   __page_size,\
     typename __edge_payload_t,\
     typename __vertex_payload_t,\
     typename __offset_t\

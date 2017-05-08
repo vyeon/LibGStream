@@ -43,103 +43,55 @@ namespace gstream {
 namespace mpl {
 
 template<int ...>
-struct sequence
-{
+struct sequence {
 };
 
 template<int N, int ...S>
-struct sequence_generator: sequence_generator < N - 1, N - 1, S... >
-{
+struct sequence_generator: sequence_generator < N - 1, N - 1, S... > {
 };
 
 template<int ...S>
-struct sequence_generator < 0, S... >
-{
+struct sequence_generator < 0, S... > {
     typedef sequence<S...> type;
 };
 
 template <class T>
-void* pvoid_cast(T pointer)
-{
+void* pvoid_cast(T pointer) {
     auto& ptr = pointer;
     void* addr = *reinterpret_cast<void**>(&ptr);
     return addr;
 }
 
 template <int I>
-struct int_to_type
-{
-    enum
-    {
+struct int_to_type {
+    enum {
         value = I
     };
 };
 
 template <class T>
-struct type_to_type
-{
+struct type_to_type {
     using real_t = T;
     template <class Arg>
     explicit type_to_type(Arg&& arg):
-        value(std::forward<Arg>(arg))
-    {
+        value(std::forward<Arg>(arg)) {
     }
     T value;
 };
 
-template <bool B>
-struct binary_dispatch
-{
-    // static const bool value = B;
-};
-
-template< class T >
-struct is_pair
-{
-    static const bool value = false;
-};
-
-template< class T1, class T2 >
-struct is_pair< std::pair< T1, T2 > >
-{
-    static const bool value = true;
-};
-
-template <class LHS, class RHS>
-constexpr inline auto sum(LHS&& lhs, RHS&& rhs) -> decltype(lhs + rhs)
-{
-    return lhs + rhs;
-}
-
-template <class Current, class ...Remainder>
-constexpr inline auto sum(Current current, Remainder... rest) -> decltype(current + sum(rest ...))
-{
-    return (current + sum(rest ...));
-}
-
 template <typename T>
-struct _sizeof
-{
-    enum
-    {
+struct _sizeof{
+    enum {
         value = sizeof(T)
     };
 };
 
 template <>
-struct _sizeof<void>
-{
-    enum
-    {
+struct _sizeof<void> {
+    enum {
         value = 0
     };
 };
-
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args)
-{
-	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
 
 } // !namespace mpl
 

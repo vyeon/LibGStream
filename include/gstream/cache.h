@@ -20,7 +20,7 @@ public:
 };
 
 template <typename Policy>
-page_cache_policy::unique_ptr generate_page_cache_policy(page_cache_key pid_min, page_cache_key pid_max) {
+page_cache_policy::unique_ptr page_cache_policy_generator_template(page_cache_key pid_min, page_cache_key pid_max) {
 	return std::make_unique<Policy>(pid_min, pid_max);
 }
 
