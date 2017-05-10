@@ -11,6 +11,10 @@ enum class strategy_t {
 };
 
 struct query_info {
+	char const* filepath;
+	std::size_t page_size;
+	page_cache_key pid_min;
+	page_cache_key pid_max;
 	std::size_t host_pagebuf_size;
 	std::size_t host_wabuf_size;
 	std::size_t host_rabuf_size;
