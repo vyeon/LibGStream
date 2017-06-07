@@ -20,13 +20,13 @@ public:
 };
 
 template <typename Policy>
-page_cache_policy::unique_ptr page_cache_policy_generator_template(gstream_pid_t pid_min, gstream_pid_t pid_max, std::size_t cached_page_limit) {
-	return std::make_unique<Policy>(pid_min, pid_max, cached_page_limit);
+page_cache_policy::unique_ptr page_cache_policy_generator_template(gstream_pid_t pid_min, gstream_pid_t pid_max, std::size_t capacity) {
+	return std::make_unique<Policy>(pid_min, pid_max, capacity);
 }
 
 #define GSTREAM_PAGE_CPGEN(__POLICY) page_cache_policy_generator_template<__POLICY>
 
-using page_cache_policy_generator = std::function<page_cache_policy::unique_ptr (gstream_pid_t /*pid_min*/, gstream_pid_t /*pid_max*/, std::size_t /*num_managed_pages*/)>;
+using page_cache_policy_generator = std::function<page_cache_policy::unique_ptr (gstream_pid_t /*pid_min*/, gstream_pid_t /*pid_max*/, std::size_t /*capacity*/)>;
 
 } // !namespace gstream
 
