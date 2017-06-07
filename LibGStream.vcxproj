@@ -12,7 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\gstream\cache.h" />
-    <ClInclude Include="include\gstream\constdefs.h" />
+    <ClInclude Include="include\gstream\gstreamdef.h" />
     <ClInclude Include="include\gstream\cuda\datatype\device_slotted_page.h" />
     <ClInclude Include="include\gstream\datatype\pagedb.h" />
     <ClInclude Include="include\gstream\datatype\slotted_page.h" />

@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <memory>
 #include <gstream/mpl.h>
-#include <gstream/constdefs.h>
+#include <gstream/gstreamdef.h>
 
 /* ---------------------------------------------------------------
 **

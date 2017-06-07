@@ -1,6 +1,6 @@
 #ifndef _LibGSTREAM_SAMPLES_PAGEDB_GENERATOR_UTILITY_H_
 #define _LibGSTREAM_SAMPLES_PAGEDB_GENERATOR_UTILITY_H_
-#include <gstream/datatype/slotted_page.h>
+#include <string>
 
 namespace utility {
 

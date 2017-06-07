@@ -1,7 +1,11 @@
 #ifndef _GSTREAM_CONSTDEFS_H_
 #define _GSTREAM_CONSTDEFS_H_
 
+#include <cstdint>
+
 namespace gstream {
+
+using gstream_pid_t = uint64_t;
 
 constexpr unsigned long long SIZE_1KiB = 1024ull;
 constexpr unsigned long long SIZE_1MiB = SIZE_1KiB * 1024ull;

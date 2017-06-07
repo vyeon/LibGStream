@@ -10,16 +10,14 @@
 ** Author: Seyeon Oh (vee@dgist.ac.kr)
 ** ------------------------------------------------------------ */
 
-#include <utility>
-#include <functional>
-#include <memory>
+#include <cstdint>
 
 // Check windows
 #if _WIN32 || _WIN64
 #if _WIN64
-#define ENV64
+#define GSTREAM_ENV64
 #else
-#define ENV32
+#define GSTREAM_ENV32
 #endif
 #endif
 
@@ -32,9 +30,9 @@
 #endif
 #endif
 
-#if defined ENV64
+#if defined GSTREAM_ENV64
 using target_arch_size_t = uint64_t;
-#elif defined ENV32
+#elif defined GSTREAM_ENV32
 using target_arch_size_t = uint32_t;
 #endif
 
@@ -67,16 +65,6 @@ struct int_to_type {
     enum {
         value = I
     };
-};
-
-template <class T>
-struct type_to_type {
-    using real_t = T;
-    template <class Arg>
-    explicit type_to_type(Arg&& arg):
-        value(std::forward<Arg>(arg)) {
-    }
-    T value;
 };
 
 template <typename T>

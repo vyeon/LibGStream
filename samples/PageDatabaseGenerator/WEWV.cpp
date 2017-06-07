@@ -1,6 +1,7 @@
 #include "utility.h"
 #include <gstream/datatype/pagedb.h>
 #include <sstream>
+#include <functional>
 
 // Weighted Edge and Weighted Vertex: WEWV
 namespace wewv {
