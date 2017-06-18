@@ -13,21 +13,20 @@ enum class gstream_strategy {
 namespace _bufconf {
 
 enum class mode_t {
-    FixedRA_Automatic,
-    FixedRA_Maunal,
-    VariadicRA_Manual
+    FixedIntegratedRA,
+    FixedSeparatedRA,
+    VariadicSeparatedRA
 };
 
 struct device_buffer_config {
     mode_t mode;
     union {
-        std::size_t pagebuf_size;   // FixedRA_Maunal
-        double pagebuf_ratio;       // VariadicRA_Manual
+        std::size_t raunit_size;    // FixedIntegratedRA & FixedSeparatedRA 
+        double pagebuf_ratio;       // VariadicSeparatedRA
     }; 
     union {
-        std::size_t raunit_size;    // FixedRA_Automatic
-        std::size_t rabuf_size;     // FixedRA_Maunal
-        double rabuf_ratio;         // VariadicRA_Manual
+        std::size_t rabuf_size;     // FixedSeparatedRA
+        double rabuf_ratio;         // VariadicSeparatedRA
     };
     union {
         std::size_t wabuf_size;     // All
@@ -38,54 +37,54 @@ struct host_buffer_config: public device_buffer_config {
     std::size_t total_size;
 };
 
-struct dev_bufconf_fraa: /*private*/ device_buffer_config {
-    dev_bufconf_fraa(std::size_t raunit_size, std::size_t wabuf_size) {
-        mode = mode_t::FixedRA_Automatic;
+struct dev_bufconf_fira: private device_buffer_config {
+    dev_bufconf_fira(std::size_t raunit_size, std::size_t wabuf_size) {
+        mode = mode_t::FixedIntegratedRA;
         this->raunit_size = raunit_size;
         this->wabuf_size = wabuf_size;
     }
 };
 
-struct host_bufconf_fraa: /*private*/ host_buffer_config {
-    host_bufconf_fraa(std::size_t total_size, std::size_t raunit_size, std::size_t wabuf_size) {
-        mode = mode_t::FixedRA_Automatic;
+struct host_bufconf_fira: private host_buffer_config {
+    host_bufconf_fira(std::size_t total_size, std::size_t raunit_size, std::size_t wabuf_size) {
+        mode = mode_t::FixedIntegratedRA;
         this->raunit_size = raunit_size;
         this->wabuf_size = wabuf_size;
         this->total_size = total_size;
     } 
 };
 
-struct dev_bufconf_fram: private device_buffer_config {
-    dev_bufconf_fram(std::size_t pagebuf_size, std::size_t rabuf_size, std::size_t wabuf_size) {
-        mode = mode_t::FixedRA_Maunal;
-        this->pagebuf_size = pagebuf_size;
+struct dev_bufconf_fsra: private device_buffer_config {
+    dev_bufconf_fsra(std::size_t raunit_size, std::size_t rabuf_size, std::size_t wabuf_size) {
+        mode = mode_t::FixedSeparatedRA;
+        this->raunit_size = raunit_size;
         this->rabuf_size = rabuf_size;
         this->wabuf_size = wabuf_size;
     }
 };
 
-struct host_bufconf_fram: private host_buffer_config {
-    host_bufconf_fram(std::size_t total_size, std::size_t pagebuf_size, std::size_t rabuf_size, std::size_t wabuf_size) {
-        mode = mode_t::FixedRA_Maunal;
-        this->pagebuf_size = pagebuf_size;
+struct host_bufconf_fsra: private host_buffer_config {
+    host_bufconf_fsra(std::size_t total_size, std::size_t raunit_size, std::size_t rabuf_size, std::size_t wabuf_size) {
+        mode = mode_t::FixedSeparatedRA;
+        this->raunit_size = raunit_size;
         this->rabuf_size = rabuf_size;
         this->wabuf_size = wabuf_size;
         this->total_size = total_size;
     }
 };
 
-struct dev_bufconf_vram : private device_buffer_config {
-    dev_bufconf_vram(double pagebuf_ratio, double rabuf_ratio, std::size_t wabuf_size) {
-        mode = mode_t::VariadicRA_Manual;
+struct dev_bufconf_vsra : private device_buffer_config {
+    dev_bufconf_vsra(double pagebuf_ratio, double rabuf_ratio, std::size_t wabuf_size) {
+        mode = mode_t::VariadicSeparatedRA;
         this->pagebuf_ratio = pagebuf_ratio;
         this->rabuf_ratio = rabuf_ratio;
         this->wabuf_size = wabuf_size;
     }
 };
 
-struct host_bufconf_vram: private host_buffer_config {
-    host_bufconf_vram(std::size_t total_size, double pagebuf_ratio, double rabuf_ratio, std::size_t wabuf_size) {
-        mode = mode_t::VariadicRA_Manual;
+struct host_bufconf_vsra: private host_buffer_config {
+    host_bufconf_vsra(std::size_t total_size, double pagebuf_ratio, double rabuf_ratio, std::size_t wabuf_size) {
+        mode = mode_t::VariadicSeparatedRA;
         this->pagebuf_ratio = pagebuf_ratio;
         this->rabuf_ratio = rabuf_ratio;
         this->wabuf_size = wabuf_size;
@@ -95,15 +94,15 @@ struct host_bufconf_vram: private host_buffer_config {
 
 } // !namespace _bufconf
 
-using dev_bufconf = _bufconf::device_buffer_config;
-using dev_bufconf_fraa = _bufconf::dev_bufconf_fraa; // FixedRA_Automatic 
-using dev_bufconf_fram = _bufconf::dev_bufconf_fram; // FixedRA_Maunal
-using dev_bufconf_vram = _bufconf::dev_bufconf_vram; // VariadicRA_Manual
+using dev_bufconf_type = _bufconf::device_buffer_config;
+using dev_bufconf_fira = _bufconf::dev_bufconf_fira; 
+using dev_bufconf_fsra = _bufconf::dev_bufconf_fsra;
+using dev_bufconf_vsra = _bufconf::dev_bufconf_vsra;
 
-using host_bufconf = _bufconf::host_buffer_config;
-using host_bufconf_fraa = _bufconf::host_bufconf_fraa; // FixedRA_Automatic 
-using host_bufconf_fram = _bufconf::host_bufconf_fram; // FixedRA_Maunal
-using host_bufconf_vram = _bufconf::host_bufconf_vram; // VariadicRA_Manual
+using host_bufconf_type = _bufconf::host_buffer_config;
+using host_bufconf_fira = _bufconf::host_bufconf_fira;
+using host_bufconf_fsra = _bufconf::host_bufconf_fsra;
+using host_bufconf_vsra = _bufconf::host_bufconf_vsra;
 
 struct query_info {
 	char const* filepath;
@@ -111,8 +110,8 @@ struct query_info {
 	gstream_pid_t pid_min;
 	gstream_pid_t pid_max;
     gstream_strategy strategy;
-    host_bufconf host_bufconf;
-    dev_bufconf  device_bufconf;
+    host_bufconf_type* host_bufconf;
+    dev_bufconf_type*  device_bufconf;
 	page_cache_policy_generator policy_gen;
 };
 

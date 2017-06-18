@@ -376,22 +376,19 @@ protected:
 
 PAGEDB_GENERATOR_TEMPALTE
 PAGEDB_GENERATOR::pagedb_generator(rid_table_t& rid_table_) :
-	rid_table{ rid_table_ }
-{
+	rid_table{ rid_table_ } {
 
 }
 
 PAGEDB_GENERATOR_TEMPALTE
-void PAGEDB_GENERATOR::init()
-{
+void PAGEDB_GENERATOR::init() {
 	vid_counter = 0;
 	num_pages = 0;
 }
 
 PAGEDB_GENERATOR_TEMPALTE
 template <typename PayloadTy>
-typename std::enable_if<std::is_void<PayloadTy>::value, generator_error_t>::type PAGEDB_GENERATOR::generate(edge_iterator_t edge_iterator, std::ostream& os)
-{
+typename std::enable_if<std::is_void<PayloadTy>::value, generator_error_t>::type PAGEDB_GENERATOR::generate(edge_iterator_t edge_iterator, std::ostream& os) {
 	vertex_id_t vid;
 	vertex_id_t max_vid;
 
@@ -404,8 +401,7 @@ typename std::enable_if<std::is_void<PayloadTy>::value, generator_error_t>::type
 	max_vid = result.second;
 
 	// Iteration
-	do
-	{
+	do {
 		iteration_per_vertex(os, vertex_t{ vid }, result.first.data(), result.first.size());
 		vid += 1;
 
@@ -413,8 +409,7 @@ typename std::enable_if<std::is_void<PayloadTy>::value, generator_error_t>::type
 		if (0 == result.first.size())
 			break; // parsing error?
 
-		if (result.first[0].src > vid)
-		{
+		if (result.first[0].src > vid) {
 			for (vertex_id_t id = vid; id < result.first[0].src; ++id)
 				iteration_per_vertex(os, vertex_t{ id }, result.first.data(), 0);
 			vid = result.first[0].src;
@@ -433,8 +428,7 @@ typename std::enable_if<std::is_void<PayloadTy>::value, generator_error_t>::type
 
 PAGEDB_GENERATOR_TEMPALTE
 template <typename PayloadTy>
-typename std::enable_if<!std::is_void<PayloadTy>::value, generator_error_t>::type PAGEDB_GENERATOR::generate(edge_iterator_t edge_iterator, vertex_iterator_t vertex_iterator, typename std::enable_if< !std::is_void<PayloadTy>::value, PayloadTy >::type default_slot_payload, std::ostream& os)
-{
+typename std::enable_if<!std::is_void<PayloadTy>::value, generator_error_t>::type PAGEDB_GENERATOR::generate(edge_iterator_t edge_iterator, vertex_iterator_t vertex_iterator, typename std::enable_if< !std::is_void<PayloadTy>::value, PayloadTy >::type default_slot_payload, std::ostream& os) {
 	vertex_id_t vid;
 	vertex_id_t max_vid;
 
@@ -451,14 +445,11 @@ typename std::enable_if<!std::is_void<PayloadTy>::value, generator_error_t>::typ
 	max_vid = edge_iter_result.second;
 
 	// Iteration
-	do
-	{
-		if (!wv_enabled || wv.vertex_id != vid)
-		{
+	do {
+		if (!wv_enabled || wv.vertex_id != vid) {
 			iteration_per_vertex(os, vertex_t{ vid, default_slot_payload }, edge_iter_result.first.data(), edge_iter_result.first.size());
 		}
-		else
-		{
+		else {
 			iteration_per_vertex(os, wv, edge_iter_result.first.data(), edge_iter_result.first.size());
 			vertex_iter_result = vertex_iterator();
 		}
@@ -468,8 +459,7 @@ typename std::enable_if<!std::is_void<PayloadTy>::value, generator_error_t>::typ
 		if (0 == edge_iter_result.first.size())
 			break; // eof
 
-		if (edge_iter_result.first[0].src > vid)
-		{
+		if (edge_iter_result.first[0].src > vid) {
 			for (vertex_id_t id = vid; id < edge_iter_result.first[0].src; ++id)
 				iteration_per_vertex(os, vertex_t{ id, default_slot_payload }, nullptr, 0);
 			vid = edge_iter_result.first[0].src;
@@ -479,12 +469,10 @@ typename std::enable_if<!std::is_void<PayloadTy>::value, generator_error_t>::typ
 			max_vid = edge_iter_result.second;
 	} while (true);
 
-	while (max_vid >= vid)
-	{
+	while (max_vid >= vid) {
 		if (!wv_enabled || wv.vertex_id != vid)
 			iteration_per_vertex(os, vertex_t{ vid, default_slot_payload }, nullptr, 0);
-		else
-		{
+		else {
 			iteration_per_vertex(os, wv, nullptr, 0);
 			vertex_iter_result = vertex_iterator();
 		}
@@ -497,13 +485,11 @@ typename std::enable_if<!std::is_void<PayloadTy>::value, generator_error_t>::typ
 
 PAGEDB_GENERATOR_TEMPALTE
 template <typename PayloadTy>
-typename std::enable_if<std::is_void<PayloadTy>::value>::type PAGEDB_GENERATOR::generate(edge_t* sorted_edges, ___size_t num_total_edges, std::ostream& os)
-{
+typename std::enable_if<std::is_void<PayloadTy>::value>::type PAGEDB_GENERATOR::generate(edge_t* sorted_edges, ___size_t num_total_edges, std::ostream& os) {
 	___size_t off = 0;
 	vertex_id_t src;
 	vertex_id_t max;
-	auto edge_iterator = [&]() -> edge_iteration_result_t
-	{
+	auto edge_iterator = [&]() -> edge_iteration_result_t {
 		edgeset_t edgeset;
 		if (off == num_total_edges)
 			return std::make_pair(edgeset, 0); // eof
@@ -511,10 +497,8 @@ typename std::enable_if<std::is_void<PayloadTy>::value>::type PAGEDB_GENERATOR::
 		src = sorted_edges[off].src;
 		max = (sorted_edges[off].src > sorted_edges[off].dst) ? sorted_edges[off].src : sorted_edges[off].dst;
 		edgeset.push_back(sorted_edges[off++]);
-		for (___size_t i = off; i < num_total_edges; ++i)
-		{
-			if (sorted_edges[off].src == src)
-			{
+		for (___size_t i = off; i < num_total_edges; ++i) {
+			if (sorted_edges[off].src == src) {
 				if (sorted_edges[off].dst > max)
 					max = sorted_edges[off].dst;
 				edgeset.push_back(sorted_edges[off++]);
@@ -529,13 +513,11 @@ typename std::enable_if<std::is_void<PayloadTy>::value>::type PAGEDB_GENERATOR::
 
 PAGEDB_GENERATOR_TEMPALTE
 template <typename PayloadTy>
-typename std::enable_if<!std::is_void<PayloadTy>::value>::type PAGEDB_GENERATOR::generate(edge_t* sorted_edges, ___size_t num_total_edges, vertex_t* sorted_vertices, ___size_t num_vertices, typename std::enable_if< !std::is_void<PayloadTy>::value, PayloadTy >::type default_slot_payload, std::ostream& os)
-{
+typename std::enable_if<!std::is_void<PayloadTy>::value>::type PAGEDB_GENERATOR::generate(edge_t* sorted_edges, ___size_t num_total_edges, vertex_t* sorted_vertices, ___size_t num_vertices, typename std::enable_if< !std::is_void<PayloadTy>::value, PayloadTy >::type default_slot_payload, std::ostream& os) {
 	___size_t e_off = 0;
 	vertex_id_t src;
 	vertex_id_t max;
-	auto edge_iterator = [&]() -> edge_iteration_result_t
-	{
+	auto edge_iterator = [&]() -> edge_iteration_result_t {
 		edgeset_t edgeset;
 		if (e_off == num_total_edges)
 			return std::make_pair(edgeset, 0); // eof
@@ -543,10 +525,8 @@ typename std::enable_if<!std::is_void<PayloadTy>::value>::type PAGEDB_GENERATOR:
 		src = sorted_edges[e_off].src;
 		max = (sorted_edges[e_off].src > sorted_edges[e_off].dst) ? sorted_edges[e_off].src : sorted_edges[e_off].dst;
 		edgeset.push_back(sorted_edges[e_off++]);
-		for (___size_t i = e_off; i < num_total_edges; ++i)
-		{
-			if (sorted_edges[e_off].src == src)
-			{
+		for (___size_t i = e_off; i < num_total_edges; ++i) {
+			if (sorted_edges[e_off].src == src) {
 				if (sorted_edges[e_off].dst > max)
 					max = sorted_edges[e_off].dst;
 				edgeset.push_back(sorted_edges[e_off++]);
@@ -557,8 +537,7 @@ typename std::enable_if<!std::is_void<PayloadTy>::value>::type PAGEDB_GENERATOR:
 	};
 
 	___size_t v_off = 0;
-	auto vertex_iterator = [&]() -> vertex_iteration_result_t
-	{
+	auto vertex_iterator = [&]() -> vertex_iteration_result_t {
 		if (v_off == num_vertices)
 			return std::make_pair(false, vertex_t{});
 		return std::make_pair(true, sorted_vertices[v_off++]);
@@ -568,8 +547,7 @@ typename std::enable_if<!std::is_void<PayloadTy>::value>::type PAGEDB_GENERATOR:
 }
 
 PAGEDB_GENERATOR_TEMPALTE
-void PAGEDB_GENERATOR::iteration_per_vertex(std::ostream& os, const vertex_t& vertex, edge_t* edges, ___size_t num_edges)
-{
+void PAGEDB_GENERATOR::iteration_per_vertex(std::ostream& os, const vertex_t& vertex, edge_t* edges, ___size_t num_edges) {
 	if (num_edges > builder_t::MaximumEdgesInHeadPage)
 		this->large_page_iteration(os, vertex, edges, num_edges);
 	else
@@ -578,15 +556,13 @@ void PAGEDB_GENERATOR::iteration_per_vertex(std::ostream& os, const vertex_t& ve
 }
 
 PAGEDB_GENERATOR_TEMPALTE
-void PAGEDB_GENERATOR::flush(std::ostream& os)
-{
+void PAGEDB_GENERATOR::flush(std::ostream& os) {
 	if (!page->is_empty())
 		issue_page(os, slotted_page_flag::SP);
 }
 
 PAGEDB_GENERATOR_TEMPALTE
-void PAGEDB_GENERATOR::small_page_iteration(std::ostream& os, const vertex_t& vertex, edge_t* edges, ___size_t num_edges)
-{
+void PAGEDB_GENERATOR::small_page_iteration(std::ostream& os, const vertex_t& vertex, edge_t* edges, ___size_t num_edges) {
 	auto scan_result = page->scan();
 	bool& slot_available = scan_result.first;
 	auto& capacity = scan_result.second;
@@ -606,8 +582,7 @@ void PAGEDB_GENERATOR::small_page_iteration(std::ostream& os, const vertex_t& ve
 }
 
 PAGEDB_GENERATOR_TEMPALTE
-void PAGEDB_GENERATOR::large_page_iteration(std::ostream& os, const vertex_t& vertex, edge_t* edges, ___size_t num_edges)
-{
+void PAGEDB_GENERATOR::large_page_iteration(std::ostream& os, const vertex_t& vertex, edge_t* edges, ___size_t num_edges) {
 	if (!page->is_empty())
 		issue_page(os, slotted_page_flag::SP);
 
