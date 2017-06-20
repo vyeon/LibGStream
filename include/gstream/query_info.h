@@ -34,7 +34,7 @@ struct host_buffer_configuration: public device_buffer_configuration {
 
 } // !namespace _bufconf
 
-namespace device_buffer_configure {
+namespace device_buffer_configuration {
 
 inline _buffer_configuration::device_buffer_configuration FixedIntegratedRA(std::size_t raunit_size, std::size_t wabuf_size) {
     _buffer_configuration::device_buffer_configuration conf;
@@ -93,7 +93,7 @@ inline _buffer_configuration::host_buffer_configuration VariadicSeparatedRA(std:
     return conf;
 }
 
-} // !namespace host_buffer_configure
+} // !namespace host_buffer_configuration
 
 using device_bufconf_type = _buffer_configuration::device_buffer_configuration;
 using host_bufconf_type = _buffer_configuration::host_buffer_configuration;
