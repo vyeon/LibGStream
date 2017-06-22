@@ -13,7 +13,7 @@ enum class gstream_strategy {
 namespace _buffer_configuration {
 
 enum class _configuration_type {
-    FixedIntegratedRA,
+    //FixedIntegratedRA,
     FixedSeparatedRA,
     VariadicSeparatedRA
 };
@@ -36,19 +36,19 @@ struct buffer_configuration {
 
 } // !namespace _buffer_configuration
 
-inline _buffer_configuration::buffer_configuration FixedIntegratedRA(std::size_t total_hostbuf_size,
-                                                                     std::size_t raunit_size,
-                                                                     std::size_t host_wabuf_size,
-                                                                     std::size_t device_wabuf_size
-) {
-    _buffer_configuration::buffer_configuration conf;
-    conf.conftype = _buffer_configuration::_configuration_type::FixedIntegratedRA;
-    conf.total_hostbuf_size = total_hostbuf_size;
-    conf.raunit_size = raunit_size;
-    conf.host_wabuf_size = host_wabuf_size;
-    conf.device_wabuf_size = device_wabuf_size;
-    return conf;
-}
+//inline _buffer_configuration::buffer_configuration FixedIntegratedRA(std::size_t total_hostbuf_size,
+//                                                                     std::size_t raunit_size,
+//                                                                     std::size_t host_wabuf_size,
+//                                                                     std::size_t device_wabuf_size
+//) {
+//    _buffer_configuration::buffer_configuration conf;
+//    conf.conftype = _buffer_configuration::_configuration_type::FixedIntegratedRA;
+//    conf.total_hostbuf_size = total_hostbuf_size;
+//    conf.raunit_size = raunit_size;
+//    conf.host_wabuf_size = host_wabuf_size;
+//    conf.device_wabuf_size = device_wabuf_size;
+//    return conf;
+//}
 
 inline _buffer_configuration::buffer_configuration FixedSeparatedRA(std::size_t total_hostbuf_size,
                                                                     std::size_t raunit_size,
@@ -87,7 +87,8 @@ inline _buffer_configuration::buffer_configuration VariadicSeparatedRA(std::size
 using gstream_bufconf = _buffer_configuration::buffer_configuration;
 
 struct query_info {
-	char const* filepath;
+    const char** filepathes;
+    std::size_t num_disks;
 	std::size_t page_size;
 	gstream_pid_t pid_min;
 	gstream_pid_t pid_max;
