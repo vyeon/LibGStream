@@ -36,5 +36,8 @@
     <ClInclude Include="include\gstream\gstreamdef.h">
       <Filter>gstream</Filter>
     </ClInclude>
+    <ClInclude Include="include\gstream\compiler.h">
+      <Filter>gstream</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
