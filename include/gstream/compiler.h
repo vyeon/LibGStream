@@ -11,8 +11,6 @@
 #define __builtin_expect(exp, c) (exp)
 #define restrict __restrict
 #elif defined(GSTREAM_FRAMEWORK_TOOLCHAIN_GCC)
-#define __expect_true(x)	__builtin_expect(!!(x), 1)
-#define __expect_false(x)	__builtin_expect(!!(x), 0)
 #endif
 
 namespace gstream {
