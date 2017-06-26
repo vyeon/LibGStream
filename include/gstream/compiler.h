@@ -9,7 +9,7 @@
 
 #if defined(GSTREAM_FRAMEWORK_TOOLCHAIN_MSVC)
 #define __builtin_expect(exp, c) (exp)
-#define restrict __restrict
+#define __restrict__ __restrict
 #elif defined(GSTREAM_FRAMEWORK_TOOLCHAIN_GCC)
 #endif
 

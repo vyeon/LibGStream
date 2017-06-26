@@ -30,13 +30,13 @@
     <ClInclude Include="include\gstream\cache.h">
       <Filter>gstream</Filter>
     </ClInclude>
-    <ClInclude Include="include\gstream\query_info.h">
-      <Filter>gstream</Filter>
-    </ClInclude>
     <ClInclude Include="include\gstream\gstreamdef.h">
       <Filter>gstream</Filter>
     </ClInclude>
     <ClInclude Include="include\gstream\compiler.h">
+      <Filter>gstream</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gstream\query_info.h">
       <Filter>gstream</Filter>
     </ClInclude>
   </ItemGroup>
