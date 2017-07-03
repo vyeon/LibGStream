@@ -9,7 +9,7 @@ namespace gstream {
 
 class page_cache_policy {
 public:
-	using key_type = gstream_pid_t;
+	using key_type = gstream_pid;
 	using shared_ptr = std::shared_ptr<page_cache_policy>;
 	using unique_ptr = std::unique_ptr<page_cache_policy>;
 	using weak_ptr = std::weak_ptr<page_cache_policy>;
@@ -20,13 +20,13 @@ public:
 };
 
 template <typename Policy>
-page_cache_policy::unique_ptr page_cache_policy_generator_template(gstream_pid_t pid_min, gstream_pid_t pid_max, std::size_t capacity) {
+page_cache_policy::unique_ptr page_cache_policy_generator_template(gstream_pid pid_min, gstream_pid pid_max, std::size_t capacity) {
 	return std::make_unique<Policy>(pid_min, pid_max, capacity);
 }
 
 #define GSTREAM_PAGE_CACHE_POLICY_GENERATOR(__POLICY) page_cache_policy_generator_template<__POLICY>
 
-using page_cache_policy_generator = std::function<page_cache_policy::unique_ptr (gstream_pid_t /*pid_min*/, gstream_pid_t /*pid_max*/, std::size_t /*capacity*/)>;
+using page_cache_policy_generator = std::function<page_cache_policy::unique_ptr (gstream_pid /*pid_min*/, gstream_pid /*pid_max*/, std::size_t /*capacity*/)>;
 
 } // !namespace gstream
 

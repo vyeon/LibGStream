@@ -65,29 +65,43 @@ inline detail::buffer_configuration FixedSeparatedRA(std::size_t total_hostbuf_s
 //}
 
 struct gstream_file_info {
-    std::string path;
+    std::wstring path;
     gstream_device_id disk_id;
-    gstream_file_info(const char* filepath, gstream_device_id disk_id):
+    gstream_file_info(const wchar_t* filepath, gstream_device_id disk_id):
         path(filepath),
         disk_id(disk_id) {
         // Nothing to do.
     }
 };
 
-inline gstream_file_info generate_file_info(const char* filepath, gstream_device_id disk_id) {
+inline gstream_file_info generate_file_info(const wchar_t* filepath, gstream_device_id disk_id) {
     return gstream_file_info(filepath, disk_id);
 }
 
+inline gstream_file_info gstream_null_file() {
+    return gstream_file_info(nullptr, -1);
+}
+
 struct gstream_input_file_info {
-    std::size_t num_partitions;
+    gstream_device_id  num_partitions;
     gstream_file_info* files;
 };
 
+inline gstream_input_file_info gstream_null_input_file() {
+    gstream_input_file_info info;
+    info.num_partitions = 0;
+    info.files = nullptr;
+    return info;
+}
+
+#define GSTREAM_NULL_INPUT gstream_null_input_file()
+
 struct gstream_query_info {
+    std::size_t num_disks;
     gstream_input_file_info pagedb;
     gstream_input_file_info radb;
-    gstream_pid_t pid_min;
-    gstream_pid_t pid_max;
+    gstream_pid pid_min;
+    gstream_pid pid_max;
     gstream_strategy strategy;
     detail::buffer_configuration bufconf;
     page_cache_policy_generator policy_gen;
