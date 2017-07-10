@@ -1,5 +1,5 @@
-﻿#ifndef _GSTREAM_DATATYPE___GSTREAM_SLOTTED_PAGE_H_
-#define _GSTREAM_DATATYPE___GSTREAM_SLOTTED_PAGE_H_
+﻿#ifndef _GSTREAM_DATATYPE_GSTREAM_SLOTTED_PAGE_H_
+#define _GSTREAM_DATATYPE_GSTREAM_SLOTTED_PAGE_H_
 #include <cstring>
 #include <cstdint>
 #include <type_traits>
@@ -742,4 +742,4 @@ struct vertex_template<__vertex_id_t, void>
 
 } // !namespace gstream
 
-#endif // !_GSTREAM_DATATYPE___GSTREAM_SLOTTED_PAGE_H_
+#endif // !_GSTREAM_DATATYPE_GSTREAM_SLOTTED_PAGE_H_

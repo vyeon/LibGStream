@@ -45,7 +45,7 @@ struct sequence {
 };
 
 template<int N, int ...S>
-struct sequence_generator: sequence_generator < N - 1, N - 1, S... > {
+struct sequence_generator : sequence_generator < N - 1, N - 1, S... > {
 };
 
 template<int ...S>
@@ -61,14 +61,19 @@ void* pvoid_cast(T pointer) {
 }
 
 template <int I>
-struct int_to_type {
+struct int2type {
     enum {
         value = I
     };
 };
 
+template <bool B>
+struct bool2type {
+    constexpr bool value = B;
+};
+
 template <typename T>
-struct _sizeof{
+struct _sizeof {
     enum {
         value = sizeof(T)
     };

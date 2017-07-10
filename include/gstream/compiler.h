@@ -1,3 +1,12 @@
+/* ---------------------------------------------------------------
+**
+** LibGStream - Library of GStream by InfoLab @ DGIST (https://infolab.dgist.ac.kr/)
+**
+** compiler.h
+**
+** Author: Seyeon Oh (vee@dgist.ac.kr)
+** ------------------------------------------------------------ */
+
 #ifndef _GSTREAM_COMPILER_H_
 #define _GSTREAM_COMPILER_H_
 
