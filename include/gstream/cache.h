@@ -26,7 +26,7 @@ page_cache_policy::unique_ptr page_cache_policy_generator_template(gstream_pid p
 
 #define GSTREAM_PAGE_CACHE_POLICY_GENERATOR(__POLICY) page_cache_policy_generator_template<__POLICY>
 
-using page_cache_policy_generator = std::function<page_cache_policy::unique_ptr (gstream_pid /*pid_min*/, gstream_pid /*pid_max*/, std::size_t /*capacity*/)>;
+using gstream_cpgen = std::function<page_cache_policy::unique_ptr (gstream_pid /*pid_min*/, gstream_pid /*pid_max*/, std::size_t /*capacity*/)>;
 
 } // !namespace gstream
 

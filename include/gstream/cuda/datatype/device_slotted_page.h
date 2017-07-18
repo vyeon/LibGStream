@@ -40,9 +40,6 @@ class device_slotted_page {
 	/* Typedefs and Constant value definitions */
 public:
 	using type = device_slotted_page<__GSTREAM_SLOTTED_PAGE_TEMPLATE_ARGS>;
-	using shared_ptr = std::shared_ptr<type>;
-	using unique_ptr = std::unique_ptr<type>;
-	using weak_ptr = std::weak_ptr<type>;
 	__GSTREAM_SLOTTED_PAGE_TEMPLATE_TYPEDEFS;
 	__GSTREAM_SLOTTED_PAGE_TEMPLATE_CONSTDEFS;
 

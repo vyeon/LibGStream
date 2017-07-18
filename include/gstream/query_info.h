@@ -10,56 +10,6 @@ enum class gstream_strategy {
     Scalability
 };
 
-namespace detail {
-
-enum class configuration_type {
-    FixedSeparatedRA,
-    /* VariadicSeparatedRA mode is not supported by current LibGStream version */
-    //VariadicSeparatedRA
-};
-
-struct buffer_configuration {
-    configuration_type conftype;
-    std::size_t total_hostbuf_size; // All
-    std::size_t page_size; // All
-    std::size_t raunit_size; // FixedSeparatedRA 
-    union {
-        std::size_t host_rabuf_size; // FixedSeparatedRA
-        double host_rabuf_ratio; // VariadicSeparatedRA
-    };
-    union {
-        std::size_t device_rabuf_size; // FixedSeparatedRA
-        double device_rabuf_ratio; // VariadicSeparatedRA
-    };
-    std::size_t host_wabuf_size; // All
-    std::size_t device_wabuf_size; // All
-    std::size_t usrspace_size; // All
-};
-
-} // !namespace detail
-
-inline detail::buffer_configuration FixedSeparatedRA(std::size_t total_hostbuf_size,
-                                                     std::size_t page_size,
-                                                     std::size_t raunit_size,
-                                                     std::size_t host_rabuf_size,
-                                                     std::size_t device_rabuf_size,
-                                                     std::size_t host_wabuf_size,
-                                                     std::size_t device_wabuf_size,
-                                                     std::size_t device_usrspace_size
-) {
-    detail::buffer_configuration conf;
-    conf.conftype = detail::configuration_type::FixedSeparatedRA;
-    conf.total_hostbuf_size = total_hostbuf_size;
-    conf.page_size = page_size;
-    conf.raunit_size = raunit_size;
-    conf.host_rabuf_size = host_rabuf_size;
-    conf.device_rabuf_size = device_rabuf_size;
-    conf.host_wabuf_size = host_wabuf_size;
-    conf.device_wabuf_size = device_wabuf_size;
-    conf.usrspace_size = device_usrspace_size;
-    return conf;
-}
-
 /* VariadicSeparatedRA mode is not supported by current LibGStream version */
 //inline detail::buffer_configuration VariadicSeparatedRA() {
 //}
@@ -94,17 +44,64 @@ inline gstream_input_file_info gstream_null_input_file() {
     return info;
 }
 
+struct gstream_bufconfig {
+    enum class policy_t {
+        FixedSeparatedRA,
+        /* VariadicSeparatedRA mode is not supported by current LibGStream version */
+        //VariadicSeparatedRA
+    };
+    policy_t policy;
+    std::size_t total_hostbuf_size; // All
+    std::size_t topology_page_size; // All
+    std::size_t ra_page_size; // FixedSeparatedRA 
+    union {
+        std::size_t host_rabuf_size; // FixedSeparatedRA
+        double host_rabuf_ratio; // VariadicSeparatedRA
+    };
+    union {
+        std::size_t device_rabuf_size; // FixedSeparatedRA
+        double device_rabuf_ratio; // VariadicSeparatedRA
+    };
+    std::size_t host_wabuf_size; // All
+    std::size_t device_wabuf_size; // All
+    std::size_t usrspace_size; // All
+};
+
+inline gstream_bufconfig FixedSeparatedRA(std::size_t total_hostbuf_size,
+                                          std::size_t topology_page_size,
+                                          std::size_t ra_page_size,
+                                          std::size_t host_rabuf_size,
+                                          std::size_t device_rabuf_size,
+                                          std::size_t host_wabuf_size,
+                                          std::size_t device_wabuf_size,
+                                          std::size_t device_usrspace_size
+) {
+    gstream_bufconfig conf;
+    conf.policy = gstream_bufconfig::policy_t::FixedSeparatedRA;
+    conf.total_hostbuf_size = total_hostbuf_size;
+    conf.topology_page_size = topology_page_size;
+    conf.ra_page_size = ra_page_size;
+    conf.host_rabuf_size = host_rabuf_size;
+    conf.device_rabuf_size = device_rabuf_size;
+    conf.host_wabuf_size = host_wabuf_size;
+    conf.device_wabuf_size = device_wabuf_size;
+    conf.usrspace_size = device_usrspace_size;
+    return conf;
+}
+
 #define GSTREAM_NULL_INPUT gstream_null_input_file()
 
-struct gstream_query_info {
-    std::size_t num_disks;
+struct gstream_query {
+    std::size_t disk_count;
+    std::size_t tpsz; // Topology Page Size
+    std::size_t rpsz; // RA Page Size 0 means variadic RA
     gstream_input_file_info pagedb;
     gstream_input_file_info radb;
     gstream_pid pid_min;
     gstream_pid pid_max;
     gstream_strategy strategy;
-    detail::buffer_configuration bufconf;
-    page_cache_policy_generator policy_gen;
+    gstream_bufconfig bufconf;
+    gstream_cpgen cpgen;
 };
 
 } // !namespace gstream
